@@ -6,16 +6,20 @@ import { spawnSmoke, renderSmoke, clearSmoke } from './smoke.js';
 let canvas, ctx, raf;
 
 // 版面比例（相對畫面高度）：長香，香爐貼近手機底部
-const STICK_TOP = 0.16;   // 起始香頭（最高點）
-const CENSER_TOP = 0.84;  // 香爐口
+const STICK_TOP_NORMAL = 0.16;  // 一般模式起始香頭
+const STICK_TOP_TABLET = 0.46;  // 牌位模式：香前移、變短，讓出上方擺牌位
+const CENSER_TOP = 0.84;        // 香爐口
+function topFrac() { return store.get().tabletMode ? STICK_TOP_TABLET : STICK_TOP_NORMAL; }
 
-// 懸掛香灰（固定形狀的歪斜下垂灰柱，長到上限就整段斷落）
+// 懸掛香灰（固定形狀的歪斜下垂灰柱，依「距上次斷落的時間」成長，到上限就整段斷落）
 const ASH_STEP = 3.5;
+const ASH_GROWTH = 0.013;  // px / ms
 let ashShape = null;      // 灰柱節點（相對火星的偏移，已含歪斜與下垂）
 let ashLen = 0;           // 目前已長出的長度（px）
 let ashMaxLen = 0;        // 本段斷落門檻
 let ashLean = 0;          // 下垂方向
 let ashSeed = 0;
+let ashStartTime = 0;     // 本段香灰開始成長的時刻（上一段斷掉時）
 const fallingAsh = [];    // 斷落的灰段（剛體翻落）
 const debris = [];        // 斷裂時的小碎屑
 const sparks = [];        // 點火瞬間的火花
@@ -45,7 +49,7 @@ export function ignite() {
   setTimeout(() => {
     store.set({ lit: true, igniting: false, phase: 'burning', startTime: performance.now() });
     document.getElementById('burnStatus').hidden = false;
-    spawnSparks(window.innerWidth / 2, window.innerHeight * STICK_TOP);
+    spawnSparks(window.innerWidth / 2, window.innerHeight * topFrac());
     setTimeout(() => lighter.classList.remove('active'), 700);
   }, 900);
 }
@@ -61,7 +65,8 @@ export function resetIncense() {
 // 火星位置：隨燃燒由上往下移（香因此變短）
 function emberY(h) {
   const s = store.get();
-  return h * STICK_TOP + h * (CENSER_TOP - STICK_TOP) * s.burnedRatio;
+  const top = topFrac();
+  return h * top + h * (CENSER_TOP - top) * s.burnedRatio;
 }
 
 function loop() {
@@ -119,7 +124,7 @@ function drawCenser(w, h) {
 // 錐度兩色香身（上段香粉褐、下段竹枝紅）
 function drawStick(cx, topY, h) {
   const censerY = h * CENSER_TOP;
-  const fullTop = h * STICK_TOP;
+  const fullTop = h * topFrac();
   const len = censerY - fullTop;
   const wTop = 2.4, wBot = 3.8;
   const wAt = (yy) => wTop + (wBot - wTop) * ((yy - fullTop) / len);
@@ -162,11 +167,12 @@ function buildAsh(maxLen, lean) {
   return pts;
 }
 
-function regenAsh() {
+function regenAsh(now) {
   ashLean = (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.5);
-  ashMaxLen = 26 + Math.random() * 26;   // 26~52px 即斷
+  ashMaxLen = 28 + Math.random() * 16;   // 28~44px 即斷（不再越長越長）
   ashSeed = (Math.random() * 6.28);
   ashShape = buildAsh(ashMaxLen, ashLean);
+  ashStartTime = now;
   ashLen = 0;
 }
 
@@ -208,7 +214,7 @@ function detachAsh(ox, oy, pts, n, ang) {
 function drawIncense(w, h) {
   const s = store.get();
   const cx = w / 2;
-  const top = h * STICK_TOP;
+  const top = h * topFrac();
   const eY = emberY(h);
   const burning = s.phase === 'burning';
   const done = s.phase === 'done';
@@ -232,9 +238,9 @@ function drawIncense(w, h) {
     ctx.fillStyle = '#1c1714';
     ctx.beginPath(); ctx.ellipse(cx, eY - 1, 3, 4, 0, 0, Math.PI * 2); ctx.fill();
 
-    // 懸掛灰柱：成長 → 搖搖欲墜 → 整段斷落
-    if (!ashShape) regenAsh();
-    ashLen += 0.22;
+    // 懸掛灰柱：依「距上次斷落的時間」成長 → 搖搖欲墜 → 整段斷落
+    if (!ashShape) regenAsh(now);
+    ashLen = Math.min(ashMaxLen, (now - ashStartTime) * ASH_GROWTH);
     const n = Math.max(2, Math.min(ashShape.length, Math.floor(ashLen / ASH_STEP) + 1));
     const prec = Math.min(1, ashLen / ashMaxLen);
     // 極輕微的「剛性」搖晃（整段一起轉一點點，非逐點彈動），越接近斷落晃越明顯
@@ -244,7 +250,7 @@ function drawIncense(w, h) {
       const tip = rot(ashShape[n - 1], sway);
       detachAsh(cx, eY, ashShape, n, sway);
       spawnDebris(cx + tip.x, eY + tip.y, 3);
-      regenAsh();
+      regenAsh(now);
     }
   }
 

@@ -12,6 +12,7 @@ const state = {
   autoTime: false,
   ecoMode: false,
   muted: false,
+  tabletMode: false,    // 牌位模式
   jiaobei: { last: null, shengCount: 0 },
 };
 
