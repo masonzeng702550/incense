@@ -128,18 +128,27 @@ body:not(.phase-idle) .gate { display: none; }
 
 /* 打火機 */
 .lighter {
-  position: fixed; left: 50%; bottom: -180px; z-index: 15;
-  transform: translateX(-50%); transition: bottom .5s ease; pointer-events: none;
+  position: fixed; left: 50%; top: 115vh; z-index: 15;
+  transform: translateX(calc(-50% - 18px)) rotate(-12deg);
+  transform-origin: 50% 100%;
+  transition: top .55s cubic-bezier(.34, 1, .5, 1), transform .55s ease;
+  pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
 }
-.lighter.active { bottom: 64%; }
-.lighter__body { width: 36px; height: 60px; background: linear-gradient(#444, #111); border-radius: 6px; margin: 0 auto; }
-.lighter__flame {
-  width: 14px; height: 28px; margin: 0 auto 2px;
-  background: radial-gradient(circle at 50% 80%, #fff, var(--ember) 50%, transparent 75%);
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  opacity: 0; filter: blur(.5px);
+/* 火星起始於畫面上方 34vh，火焰頂端對到香頭 */
+.lighter.active { top: calc(34vh - 18px); }
+
+/* 火焰預設不顯示，點火時跳動 */
+.lighter-flame { opacity: 0; transform-origin: 32px 62px; transition: opacity .15s; }
+.lighter.active .lighter-flame { opacity: 1; animation: flicker .12s infinite alternate; }
+.lighter .flame-inner { transform-origin: 32px 60px; }
+.lighter.active .flame-inner { animation: flicker-in .1s infinite alternate; }
+@keyframes flicker {
+  from { transform: scaleY(1) scaleX(1) translateX(0); }
+  to   { transform: scaleY(1.12) scaleX(.94) translateX(1px); }
 }
-.lighter.active .lighter__flame { opacity: 1; animation: flicker .15s infinite alternate; }
-@keyframes flicker { from { transform: scaleY(1) translateX(0); } to { transform: scaleY(1.2) translateX(2px); } }
+@keyframes flicker-in {
+  from { transform: scaleY(1) translateX(0); opacity: 1; }
+  to   { transform: scaleY(.88) translateX(-1px); opacity: .8; }
+}
 
 [hidden] { display: none !important; }

@@ -5,9 +5,9 @@ import { spawnSmoke, renderSmoke, clearSmoke } from './smoke.js';
 
 let canvas, ctx, raf;
 
-// 版面比例（相對畫面高度），整體以垂直中線為中心
-const TIP_TOP = 0.30;    // 起始香頭（最高點）
-const STICK_BOTTOM = 0.66; // 插入香爐處
+// 版面比例（相對畫面高度）：香身中點對齊畫面正中 0.5
+const TIP_TOP = 0.34;      // 起始香頭（最高點）
+const STICK_BOTTOM = 0.66; // 插入香爐處（中點 = 0.5）
 const CENSER_Y = 0.66;
 
 export function initStage() {
