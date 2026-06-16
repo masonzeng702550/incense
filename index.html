@@ -74,9 +74,9 @@
     <button id="closeSettings" class="btn btn--ghost">關閉</button>
   </aside>
 
-  <!-- 打火機 -->
+  <!-- 打火機（由螢幕上方往下點，火焰朝下） -->
   <div id="lighter" class="lighter" aria-hidden="true">
-    <svg viewBox="0 0 64 168" width="64" height="168">
+    <svg viewBox="0 0 64 172" width="64" height="172">
       <defs>
         <linearGradient id="lg-body" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stop-color="#6e1414"/>
@@ -88,33 +88,33 @@
           <stop offset="0.5" stop-color="#e9ecef"/>
           <stop offset="1" stop-color="#7a7d82"/>
         </linearGradient>
-        <radialGradient id="lg-flame-out" cx="50%" cy="78%" r="60%">
+        <radialGradient id="lg-flame-out" cx="50%" cy="28%" r="62%">
           <stop offset="0" stop-color="#ffd24a"/>
           <stop offset="0.55" stop-color="#ff8a18"/>
           <stop offset="1" stop-color="#ff5a00" stop-opacity="0"/>
         </radialGradient>
-        <radialGradient id="lg-flame-in" cx="50%" cy="82%" r="55%">
+        <radialGradient id="lg-flame-in" cx="50%" cy="22%" r="55%">
           <stop offset="0" stop-color="#ffffff"/>
           <stop offset="0.5" stop-color="#bfe0ff"/>
           <stop offset="1" stop-color="#4f9bd8" stop-opacity="0"/>
         </radialGradient>
       </defs>
 
-      <!-- 火焰 -->
-      <g class="lighter-flame">
-        <path class="flame-outer" d="M32 6 C44 30 50 44 32 62 C14 44 20 30 32 6 Z" fill="url(#lg-flame-out)"/>
-        <path class="flame-inner" d="M32 30 C39 42 41 50 32 60 C23 50 25 42 32 30 Z" fill="url(#lg-flame-in)"/>
-      </g>
+      <!-- 機身（上） -->
+      <rect x="16" y="6" width="32" height="84" rx="9" fill="url(#lg-body)" stroke="#3c0c0c" stroke-width="1"/>
+      <rect x="21" y="14" width="5" height="68" rx="2.5" fill="#fff" opacity="0.18"/>
 
       <!-- 金屬罩 + 噴嘴 + 火石輪 -->
-      <rect x="18" y="60" width="28" height="22" rx="3" fill="url(#lg-metal)"/>
-      <rect x="29" y="54" width="6" height="10" rx="2" fill="#9aa0a6"/>
-      <circle cx="46" cy="66" r="6" fill="#c9ccd1" stroke="#6a6d72" stroke-width="1.5"/>
-      <circle cx="46" cy="66" r="2" fill="#6a6d72"/>
+      <rect x="18" y="88" width="28" height="22" rx="3" fill="url(#lg-metal)"/>
+      <rect x="29" y="108" width="6" height="10" rx="2" fill="#9aa0a6"/>
+      <circle cx="46" cy="100" r="6" fill="#c9ccd1" stroke="#6a6d72" stroke-width="1.5"/>
+      <circle cx="46" cy="100" r="2" fill="#6a6d72"/>
 
-      <!-- 機身 -->
-      <rect x="16" y="80" width="32" height="84" rx="9" fill="url(#lg-body)" stroke="#3c0c0c" stroke-width="1"/>
-      <rect x="21" y="88" width="5" height="68" rx="2.5" fill="#fff" opacity="0.18"/>
+      <!-- 火焰（朝下） -->
+      <g class="lighter-flame">
+        <path class="flame-outer" d="M32 166 C44 142 50 128 32 110 C14 128 20 142 32 166 Z" fill="url(#lg-flame-out)"/>
+        <path class="flame-inner" d="M32 142 C39 130 41 122 32 112 C23 122 25 130 32 142 Z" fill="url(#lg-flame-in)"/>
+      </g>
     </svg>
   </div>
 

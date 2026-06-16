@@ -126,29 +126,29 @@ body:not(.phase-idle) .gate { display: none; }
 .field input[type=range] { width: 100%; accent-color: var(--temple-red); }
 .weather-info { font-size: .85rem; opacity: .75; min-height: 1.2em; }
 
-/* 打火機 */
+/* 打火機：由螢幕上方往下點（NFC 多在手機上方） */
 .lighter {
-  position: fixed; left: 50%; top: 115vh; z-index: 15;
-  transform: translateX(calc(-50% - 18px)) rotate(-12deg);
-  transform-origin: 50% 100%;
+  position: fixed; left: 50%; top: -200px; z-index: 15;
+  transform: translateX(calc(-50% - 14px)) rotate(7deg);
+  transform-origin: 50% 0;
   transition: top .55s cubic-bezier(.34, 1, .5, 1), transform .55s ease;
   pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
 }
-/* 火星起始於畫面上方 16vh，火焰頂端對到香頭 */
-.lighter.active { top: calc(16vh - 6px); }
+/* 火焰尖端（約在 SVG 底部）對到香頭 16vh */
+.lighter.active { top: calc(16vh - 160px); }
 
-/* 火焰預設不顯示，點火時跳動 */
-.lighter-flame { opacity: 0; transform-origin: 32px 62px; transition: opacity .15s; }
+/* 火焰預設不顯示，點火時往下竄並跳動 */
+.lighter-flame { opacity: 0; transform-origin: 32px 110px; transition: opacity .15s; }
 .lighter.active .lighter-flame { opacity: 1; animation: flicker .12s infinite alternate; }
-.lighter .flame-inner { transform-origin: 32px 60px; }
+.lighter .flame-inner { transform-origin: 32px 112px; }
 .lighter.active .flame-inner { animation: flicker-in .1s infinite alternate; }
 @keyframes flicker {
   from { transform: scaleY(1) scaleX(1) translateX(0); }
-  to   { transform: scaleY(1.12) scaleX(.94) translateX(1px); }
+  to   { transform: scaleY(1.14) scaleX(.93) translateX(1px); }
 }
 @keyframes flicker-in {
   from { transform: scaleY(1) translateX(0); opacity: 1; }
-  to   { transform: scaleY(.88) translateX(-1px); opacity: .8; }
+  to   { transform: scaleY(.86) translateX(-1px); opacity: .8; }
 }
 
 [hidden] { display: none !important; }
