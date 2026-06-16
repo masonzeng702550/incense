@@ -1,8 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- maskable：重要內容置於中央 80% 安全區 -->
-  <rect width="512" height="512" fill="#1a0f0a"/>
-  <rect x="226" y="170" width="20" height="180" rx="10" fill="#7a4a2b" transform="translate(20,0)"/>
-  <circle cx="256" cy="170" r="18" fill="#ff7a18"/>
-  <circle cx="256" cy="170" r="8" fill="#fff"/>
-  <path d="M256 150 C240 126 280 110 256 86" stroke="#d8d2c8" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <defs>
+    <radialGradient id="bgm" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#2a1810"/>
+      <stop offset="100%" stop-color="#160c07"/>
+    </radialGradient>
+    <radialGradient id="emberm" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#ff8a2b"/>
+      <stop offset="100%" stop-color="#ff7a18" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- maskable：滿版底，內容收在中央安全區 -->
+  <rect width="512" height="512" fill="url(#bgm)"/>
+
+  <circle cx="256" cy="256" r="92" fill="none" stroke="#d4af37" stroke-opacity="0.22" stroke-width="2"/>
+
+  <!-- 一炷香 -->
+  <line x1="256" y1="212" x2="256" y2="356" stroke="#caa06a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- 火星 -->
+  <circle cx="256" cy="212" r="28" fill="url(#emberm)"/>
+  <circle cx="256" cy="212" r="6" fill="#fff"/>
+
+  <!-- 一縷煙 -->
+  <path d="M256 192 C240 168 280 152 256 128 C240 110 276 96 256 76"
+        fill="none" stroke="#d8d2c8" stroke-opacity="0.5" stroke-width="6" stroke-linecap="round"/>
 </svg>

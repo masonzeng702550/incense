@@ -3,9 +3,9 @@ import { store } from './store.js';
 import { sound } from './sound.js';
 
 const RESULTS = {
-  sheng: { name: '聖筊', desc: '神明應允 ✅' },
-  xiao: { name: '笑筊', desc: '神明微笑，請再問 🙂' },
-  yin: { name: '陰筊', desc: '神明未允，宜三思 🙏' },
+  sheng: { name: '聖筊', desc: '神明應允' },
+  xiao: { name: '笑筊', desc: '神明微笑，請再問' },
+  yin: { name: '陰筊', desc: '神明未允，宜三思' },
 };
 
 // a/b：true = 正面（平面朝上）

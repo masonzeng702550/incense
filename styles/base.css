@@ -57,7 +57,7 @@ body:not(.phase-idle) .gate { display: none; }
   display: flex; justify-content: space-between; align-items: center;
   padding: .75rem 1rem;
 }
-.brand { font-weight: 700; color: var(--gold); }
+.brand { font-weight: 700; color: var(--gold); letter-spacing: .35em; padding-left: .35em; }
 
 .controls {
   position: fixed; left: 0; right: 0;
@@ -67,7 +67,7 @@ body:not(.phase-idle) .gate { display: none; }
 
 /* 按鈕 */
 .btn {
-  font: inherit; font-size: 1rem; padding: .75rem 1.25rem;
+  font: inherit; font-size: 1rem; letter-spacing: .25em; padding: .75rem 1.4rem .75rem 1.65rem;
   border: 1px solid rgba(212,175,55,.4); border-radius: 999px;
   background: rgba(0,0,0,.45); color: var(--text);
   backdrop-filter: blur(6px); cursor: pointer; transition: transform .1s, background .2s;
@@ -75,7 +75,15 @@ body:not(.phase-idle) .gate { display: none; }
 .btn:active { transform: scale(.95); }
 .btn--primary { background: var(--temple-red); border-color: var(--gold); font-weight: 700; }
 .btn--ghost { background: transparent; }
-.icon-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; }
+.icon-btn {
+  font: inherit; font-size: .8rem; letter-spacing: .15em;
+  color: var(--text); opacity: .75;
+  background: none; border: 1px solid rgba(212,175,55,.3);
+  border-radius: 999px; padding: .35rem .8rem; cursor: pointer;
+  transition: opacity .2s;
+}
+.icon-btn:active { opacity: 1; }
+.icon-btn.is-muted { opacity: .4; }
 
 /* 燃香狀態 */
 .burn-status {

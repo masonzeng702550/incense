@@ -55,7 +55,7 @@ export function initTimer() {
       text.textContent = `一炷香 ${fmt(left)}`;
     } else if (s.phase === 'done') {
       fill.style.width = '100%';
-      text.textContent = '一炷香已盡 🙏';
+      text.textContent = '一炷香已盡';
     }
   });
 }

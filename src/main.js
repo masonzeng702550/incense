@@ -59,7 +59,8 @@ lightBtn.addEventListener('click', () => {
 muteBtn.addEventListener('click', () => {
   const muted = !store.get().muted;
   store.set({ muted });
-  muteBtn.textContent = muted ? '🔇' : '🔊';
+  muteBtn.textContent = muted ? '靜音' : '聲音';
+  muteBtn.classList.toggle('is-muted', muted);
 });
 
 settingsBtn.addEventListener('click', () => { settingsPanel.hidden = false; });
@@ -67,7 +68,7 @@ closeSettings.addEventListener('click', () => { settingsPanel.hidden = true; });
 
 // 燃畢時把點香鈕變成「重新上香」
 store.subscribe((s) => {
-  if (s.phase === 'done') lightBtn.textContent = '🪔 重新上香';
-  else if (s.phase === 'burning') lightBtn.textContent = '🌬️ 熄香';
-  else lightBtn.textContent = '🔥 點香';
+  if (s.phase === 'done') lightBtn.textContent = '重新上香';
+  else if (s.phase === 'burning') lightBtn.textContent = '熄香';
+  else lightBtn.textContent = '點香';
 });
