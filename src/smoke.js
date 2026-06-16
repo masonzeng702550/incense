@@ -5,8 +5,9 @@ import { caps } from './platform.js';
 const MOTION_THRESHOLD = 18; // 加速度閾值（m/s²）觸發殘影
 const particles = [];
 let emberX = 0; // 升流起點（火星 x）
+let listenersAdded = false;
 
-// 在使用者手勢中呼叫（iOS 需明確授權）
+// 在使用者手勢中呼叫（iOS 需明確授權）。事件只在 motionEnabled 時生效。
 export async function enableTilt() {
   if (!caps.hasOrientation) return false;
   try {
@@ -14,15 +15,20 @@ export async function enableTilt() {
       const res = await DeviceOrientationEvent.requestPermission();
       if (res !== 'granted') return false;
     }
-    window.addEventListener('deviceorientation', (e) => {
-      store.set({ tilt: { beta: e.beta || 0, gamma: e.gamma || 0 } });
-    });
-    if (typeof DeviceMotionEvent !== 'undefined') {
-      window.addEventListener('devicemotion', (e) => {
-        const a = e.acceleration || {};
-        const mag = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
-        store.set({ fastMove: mag > MOTION_THRESHOLD });
+    if (!listenersAdded) {
+      window.addEventListener('deviceorientation', (e) => {
+        if (!store.get().motionEnabled) return;
+        store.set({ tilt: { beta: e.beta || 0, gamma: e.gamma || 0 } });
       });
+      if (typeof DeviceMotionEvent !== 'undefined') {
+        window.addEventListener('devicemotion', (e) => {
+          if (!store.get().motionEnabled) return;
+          const a = e.acceleration || {};
+          const mag = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
+          store.set({ fastMove: mag > MOTION_THRESHOLD });
+        });
+      }
+      listenersAdded = true;
     }
     return true;
   } catch {

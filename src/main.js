@@ -2,7 +2,7 @@
 import { caps, applyBodyClasses } from './platform.js';
 import { store } from './store.js';
 import { sound } from './sound.js';
-import { startCamera } from './camera.js';
+import { startCamera, stopCamera } from './camera.js';
 import { enableTilt } from './smoke.js';
 import { initStage, ignite, resetIncense } from './incense.js';
 import { initTimer } from './timer.js';
@@ -10,6 +10,10 @@ import { initJiaobei } from './jiaobei.js';
 import { initTablet } from './tablet.js';
 import { getNfcAction, scanNfc } from './nfc.js';
 import { registerPwa } from './pwa.js';
+
+// 功能偏好（記住選擇，避免每次都詢問權限）：'unset' | 'on' | 'off'
+const getPref = (k) => localStorage.getItem('pref_' + k) || 'unset';
+const setPref = (k, v) => localStorage.setItem('pref_' + k, v);
 
 applyBodyClasses();
 initStage();
@@ -24,20 +28,40 @@ const muteBtn = document.getElementById('muteBtn');
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsPanel = document.getElementById('settingsPanel');
 const closeSettings = document.getElementById('closeSettings');
+const featCamera = document.getElementById('featCamera');
+const featMotion = document.getElementById('featMotion');
+
+// 設定面板勾選狀態還原（顯示目前偏好）
+featCamera.checked = getPref('camera') === 'on';
+featMotion.checked = getPref('motion') === 'on';
 
 // NFC 帶入 ?action=lighter → 等使用者手勢後自動點香
 let pendingAutoIgnite = getNfcAction() === 'lighter';
 
-// 「開始參拜」：在這個手勢中請求所有權限（iOS 限制）
+async function enableCamera() {
+  const ok = await startCamera();
+  setPref('camera', ok ? 'on' : 'off');
+  featCamera.checked = ok;
+  return ok;
+}
+async function enableMotion() {
+  store.set({ motionEnabled: true });
+  const ok = await enableTilt();
+  if (!ok) store.set({ motionEnabled: false });
+  setPref('motion', ok ? 'on' : 'off');
+  featMotion.checked = ok;
+  return ok;
+}
+
+// 「開始參拜」：只在第一次（unset）或已選開啟（on）時請求；選擇被記住，不再每次詢問
 startBtn.addEventListener('click', async () => {
   sound.unlock();
   store.set({ phase: 'ready' });
   document.body.classList.remove('phase-idle');
 
-  // 並行請求（互不阻塞），失敗皆優雅降級
   if (caps.isMobile) {
-    startCamera();
-    enableTilt();
+    if (getPref('camera') !== 'off') enableCamera();
+    if (getPref('motion') !== 'off') enableMotion();
   }
 
   // Android Chrome：嘗試 App 內主動掃描 NFC
@@ -49,6 +73,16 @@ startBtn.addEventListener('click', async () => {
     pendingAutoIgnite = false;
     setTimeout(() => ignite(), 600);
   }
+});
+
+// 設定面板：手動開關（開啟時才請求權限；關閉後永遠不問）
+featCamera.addEventListener('change', async () => {
+  if (featCamera.checked) { await enableCamera(); }
+  else { stopCamera(); setPref('camera', 'off'); }
+});
+featMotion.addEventListener('change', async () => {
+  if (featMotion.checked) { await enableMotion(); }
+  else { store.set({ motionEnabled: false, tilt: { beta: 0, gamma: 0 }, fastMove: false }); setPref('motion', 'off'); }
 });
 
 lightBtn.addEventListener('click', () => {

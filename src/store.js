@@ -7,6 +7,7 @@ const state = {
   duration: 600,        // 秒
   burnedRatio: 0,       // 0~1
   cameraOn: false,
+  motionEnabled: false, // 動態效果（陀螺儀）是否啟用
   tilt: { beta: 0, gamma: 0 },
   fastMove: false,
   autoTime: false,

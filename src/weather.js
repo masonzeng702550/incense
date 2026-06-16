@@ -7,8 +7,17 @@ const BASE = 600;
 function getGeo() {
   return new Promise((resolve, reject) => {
     if (!caps.hasGeo) return reject(new Error('no geolocation'));
+    // 已快取座標 → 直接用，不再請求位置權限
+    const cached = localStorage.getItem('geo');
+    if (cached) {
+      try { return resolve(JSON.parse(cached)); } catch { /* ignore */ }
+    }
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve(pos.coords),
+      (pos) => {
+        const c = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+        localStorage.setItem('geo', JSON.stringify(c));
+        resolve(c);
+      },
       reject,
       { timeout: 8000, maximumAge: 600000 },
     );
