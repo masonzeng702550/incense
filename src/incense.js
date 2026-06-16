@@ -1,28 +1,26 @@
-// F2 / F4 — 一炷長香（香爐露上緣、香由上往下燒而變短、香灰歪斜下垂、整段斷落）
+// F2 / F4 — 一炷長香（香爐露上緣、香由上往下燒；香灰=已燒長度、錨在上、最長 1/10、隨機時間或搖晃才整段掉）
 import { store } from './store.js';
 import { sound } from './sound.js';
 import { spawnSmoke, renderSmoke, clearSmoke } from './smoke.js';
 
 let canvas, ctx, raf;
 
-// 版面比例（相對畫面高度）：長香，香爐貼近手機底部
-const STICK_TOP_NORMAL = 0.16;  // 一般模式起始香頭
-const STICK_TOP_TABLET = 0.46;  // 牌位模式：香前移、變短，讓出上方擺牌位
-const CENSER_TOP = 0.84;        // 香爐口
+// 版面比例（相對畫面高度）
+const STICK_TOP_NORMAL = 0.16;
+const STICK_TOP_TABLET = 0.46;  // 牌位模式：香前移、變短
+const CENSER_TOP = 0.84;
 function topFrac() { return store.get().tabletMode ? STICK_TOP_TABLET : STICK_TOP_NORMAL; }
 
-// 懸掛香灰（固定形狀的歪斜下垂灰柱，依「距上次斷落的時間」成長，到上限就整段斷落）
-const ASH_STEP = 3.5;
-const ASH_GROWTH = 0.013;  // px / ms
-let ashShape = null;      // 灰柱節點（相對火星的偏移，已含歪斜與下垂）
-let ashLen = 0;           // 目前已長出的長度（px）
-let ashMaxLen = 0;        // 本段斷落門檻
-let ashLean = 0;          // 下垂方向
-let ashSeed = 0;
-let ashStartTime = 0;     // 本段香灰開始成長的時刻（上一段斷掉時）
-const fallingAsh = [];    // 斷落的灰段（剛體翻落）
-const debris = [];        // 斷裂時的小碎屑
-const sparks = [];        // 點火瞬間的火花
+// 香灰：自上而下累積的節點（世界座標），長度 = 距上次掉落所燒掉的長度
+const ASH_NODE_STEP = 3;
+let ashNodes = null;       // [{x,y}...] 由上（最老）到下（火星）
+let ashSegTopY = 0;        // 本段香灰最頂端（上次掉落處）
+let ashDropLen = 0;        // 本段隨機掉落門檻（≤ 整炷香 1/10）
+let shakeAccum = 0;        // 搖晃累積（晃手機加速掉落）
+
+const fallingAsh = [];     // 斷落的灰段（剛體翻落）
+const debris = [];         // 碎屑
+const sparks = [];         // 點火火花
 
 export function initStage() {
   canvas = document.getElementById('stage');
@@ -57,12 +55,12 @@ export function ignite() {
 export function resetIncense() {
   clearSmoke();
   fallingAsh.length = 0; debris.length = 0; sparks.length = 0;
-  ashShape = null; ashLen = 0;
+  ashNodes = null; shakeAccum = 0;
   store.set({ lit: false, igniting: false, phase: 'idle', burnedRatio: 0 });
   document.getElementById('burnStatus').hidden = true;
 }
 
-// 火星位置：隨燃燒由上往下移（香因此變短）
+// 火星位置：隨燃燒由上往下移
 function emberY(h) {
   const s = store.get();
   const top = topFrac();
@@ -99,7 +97,7 @@ function loop() {
   raf = requestAnimationFrame(loop);
 }
 
-// 香爐：只畫上緣（碗口 + 一小段前壁）
+// 香爐：只畫上緣
 function drawCenser(w, h) {
   const cx = w / 2;
   const y = h * CENSER_TOP;
@@ -121,7 +119,7 @@ function drawCenser(w, h) {
   ctx.stroke();
 }
 
-// 錐度兩色香身（上段香粉褐、下段竹枝紅）
+// 錐度兩色香身
 function drawStick(cx, topY, h) {
   const censerY = h * CENSER_TOP;
   const fullTop = h * topFrac();
@@ -151,64 +149,54 @@ function drawStick(cx, topY, h) {
   ctx.stroke();
 }
 
-// 建立一段固定形狀的歪斜下垂灰柱（建立後不再變形 → 不會有彈性）
-function buildAsh(maxLen, lean) {
-  const pts = [{ x: 0, y: 0 }];
-  let x = 0, y = 0, wob = 0;
-  for (let s = ASH_STEP; s <= maxLen; s += ASH_STEP) {
-    const frac = s / maxLen;
-    wob = wob * 0.78 + (Math.random() - 0.5) * 0.32;   // 固定的歪斜
-    const sag = lean * frac * 0.9;                       // 越長越下垂（重力彎曲）
-    const heading = -Math.PI / 2 + wob * 0.5 + sag;      // 大致朝上、略歪略垂
-    x += Math.cos(heading) * ASH_STEP;
-    y += Math.sin(heading) * ASH_STEP;
-    pts.push({ x, y });
-  }
-  return pts;
+// 整炷香 1/10 為香灰最長值
+function maxAshLen(h) { return (h * CENSER_TOP - h * topFrac()) / 10; }
+function pickDropLen(h) { return maxAshLen(h) * (0.4 + Math.random() * 0.6); }
+
+function startAshSeg(cx, y, h) {
+  ashNodes = [{ x: cx, y }];
+  ashSegTopY = y;
+  ashDropLen = pickDropLen(h);
 }
 
-function regenAsh(now) {
-  ashLean = (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.5);
-  ashMaxLen = 28 + Math.random() * 16;   // 28~44px 即斷（不再越長越長）
-  ashSeed = (Math.random() * 6.28);
-  ashShape = buildAsh(ashMaxLen, ashLean);
-  ashStartTime = now;
-  ashLen = 0;
-}
-
-function rot(p, a) {
+function rotAbout(p, ox, oy, a) {
   const c = Math.cos(a), s = Math.sin(a);
-  return { x: p.x * c - p.y * s, y: p.x * s + p.y * c };
+  const dx = p.x - ox, dy = p.y - oy;
+  return { x: ox + dx * c - dy * s, y: oy + dx * s + dy * c };
 }
 
-function drawAshPolyline(ox, oy, pts, n, ang) {
+function drawAshColumn(ox, oy, sway) {
+  if (!ashNodes || ashNodes.length < 2) return;
   ctx.beginPath();
-  for (let i = 0; i < n; i++) {
-    const r = rot(pts[i], ang);
-    const X = ox + r.x, Y = oy + r.y;
-    if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+  for (let i = 0; i < ashNodes.length; i++) {
+    const r = rotAbout(ashNodes[i], ox, oy, sway);
+    if (i === 0) ctx.moveTo(r.x, r.y); else ctx.lineTo(r.x, r.y);
   }
   ctx.strokeStyle = 'rgba(150,144,134,0.82)';
-  ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.stroke();
-  // 灰尾端炭化
-  const tip = rot(pts[n - 1], ang);
-  ctx.fillStyle = 'rgba(58,52,46,0.85)';
-  ctx.beginPath();
-  ctx.arc(ox + tip.x, oy + tip.y, 2, 0, Math.PI * 2);
-  ctx.fill();
+  // 頂端（最老最脆）炭化
+  const tip = rotAbout(ashNodes[0], ox, oy, sway);
+  ctx.fillStyle = 'rgba(70,62,54,0.85)';
+  ctx.beginPath(); ctx.arc(tip.x, tip.y, 2, 0, Math.PI * 2); ctx.fill();
 }
 
-function detachAsh(ox, oy, pts, n, ang) {
-  const seg = [];
-  for (let i = 0; i < n; i++) seg.push(rot(pts[i], ang));
+// 整段香灰斷落、剛體翻墜
+function dropAshColumn(ox, oy, sway) {
+  if (!ashNodes || ashNodes.length < 2) return;
+  const pts = ashNodes.map((p) => rotAbout(p, ox, oy, sway));
+  let mx = 0, my = 0;
+  for (const p of pts) { mx += p.x; my += p.y; }
+  mx /= pts.length; my /= pts.length;
   fallingAsh.push({
-    pts: seg, x: ox, y: oy, ang: 0,
-    vx: ashLean * 0.5 + (Math.random() - 0.5) * 0.3,
-    vy: 0.15 + Math.random() * 0.25,
+    pts: pts.map((p) => ({ x: p.x - mx, y: p.y - my })),
+    x: mx, y: my, ang: 0,
+    vx: Math.sin(sway) * 2 + (Math.random() - 0.5) * 0.4,
+    vy: 0.1 + Math.random() * 0.2,
     va: (Math.random() - 0.5) * 0.05,
-    life: 1, decay: 0.007 + Math.random() * 0.005,
+    life: 1, decay: 0.006 + Math.random() * 0.004,
   });
+  spawnDebris(ox, oy, 3);
 }
 
 function drawIncense(w, h) {
@@ -221,13 +209,13 @@ function drawIncense(w, h) {
   const igniting = s.igniting;
   const now = performance.now();
 
-  // 未燃香身（火星 → 香爐），香隨燃燒由上而短
+  // 未燃香身（火星 → 香爐）
   if (s.burnedRatio < 1) {
     drawStick(cx, (burning || done) ? eY : top, h);
   }
 
-  // 燃燒中：暗紅餘燼 + 黑炭頭（緊貼火星，隨之下移）+ 懸掛灰柱
   if (burning) {
+    // 暗紅餘燼 + 黑炭頭（緊貼火星）
     const breathe = 0.7 + Math.sin(now / 240) * 0.3;
     const R = 5 * breathe;
     const glow = ctx.createRadialGradient(cx, eY, 0, cx, eY, R);
@@ -238,29 +226,34 @@ function drawIncense(w, h) {
     ctx.fillStyle = '#1c1714';
     ctx.beginPath(); ctx.ellipse(cx, eY - 1, 3, 4, 0, 0, Math.PI * 2); ctx.fill();
 
-    // 懸掛灰柱：依「距上次斷落的時間」成長 → 搖搖欲墜 → 整段斷落
-    if (!ashShape) regenAsh(now);
-    ashLen = Math.min(ashMaxLen, (now - ashStartTime) * ASH_GROWTH);
-    const n = Math.max(2, Math.min(ashShape.length, Math.floor(ashLen / ASH_STEP) + 1));
-    const prec = Math.min(1, ashLen / ashMaxLen);
-    // 極輕微的「剛性」搖晃（整段一起轉一點點，非逐點彈動），越接近斷落晃越明顯
-    const sway = Math.sin(now / 620 + ashSeed) * 0.025 * (0.35 + prec);
-    drawAshPolyline(cx, eY, ashShape, n, sway);
-    if (ashLen >= ashMaxLen) {
-      const tip = rot(ashShape[n - 1], sway);
-      detachAsh(cx, eY, ashShape, n, sway);
-      spawnDebris(cx + tip.x, eY + tip.y, 3);
-      regenAsh(now);
+    // 香灰：隨火星下移在世界座標累積（長度 = 已燒長度）
+    if (ashNodes === null) startAshSeg(cx, eY, h);
+    let guard = 0;
+    while (eY - ashNodes[ashNodes.length - 1].y >= ASH_NODE_STEP && guard++ < 300) {
+      const prev = ashNodes[ashNodes.length - 1];
+      const nx = prev.x * 0.8 + cx * 0.2 + (Math.random() - 0.5) * 1.8; // 略歪、貼著原軸
+      ashNodes.push({ x: nx, y: prev.y + ASH_NODE_STEP });
+    }
+    const ashLen = eY - ashSegTopY;
+    const prec = Math.min(1, ashLen / ashDropLen);
+    // 剛性搖晃（繞火星），越接近掉落晃越大 → 搖搖欲墜
+    const sway = Math.sin(now / 600 + ashSegTopY) * 0.045 * (0.3 + prec);
+
+    // 晃手機：累積搖晃，提早整段掉落
+    if (s.fastMove) shakeAccum += 18; else shakeAccum *= 0.94;
+
+    drawAshColumn(cx, eY, sway);
+
+    if (ashLen >= ashDropLen || (shakeAccum > 200 && ashLen > 8)) {
+      dropAshColumn(cx, eY, sway);
+      startAshSeg(cx, eY, h);
+      shakeAccum = 0;
     }
   }
 
   // 燒盡：殘香斷落、爐中留炭黑短截，無火光
   if (done) {
-    if (ashShape) {
-      const n = Math.max(2, Math.min(ashShape.length, Math.floor(ashLen / ASH_STEP) + 1));
-      detachAsh(cx, eY, ashShape, n, 0);
-      ashShape = null;
-    }
+    if (ashNodes) { dropAshColumn(cx, eY, 0); ashNodes = null; }
     const stubTop = h * CENSER_TOP - 30;
     ctx.lineCap = 'round'; ctx.lineWidth = 4;
     ctx.strokeStyle = '#2a2320';
@@ -269,7 +262,7 @@ function drawIncense(w, h) {
     ctx.beginPath(); ctx.arc(cx, stubTop, 3, 0, Math.PI * 2); ctx.fill();
   }
 
-  // 點火瞬間：頂端火光（之後不再有火花）
+  // 點火瞬間火光
   if (igniting) {
     const breathe = 0.8 + Math.sin(now / 120) * 0.2;
     const R = 10 * breathe;
@@ -282,7 +275,6 @@ function drawIncense(w, h) {
   }
 }
 
-// 斷落的灰段：剛體翻落、淡出
 function renderFallingAsh() {
   for (let i = fallingAsh.length - 1; i >= 0; i--) {
     const f = fallingAsh[i];
@@ -293,12 +285,12 @@ function renderFallingAsh() {
     ctx.globalAlpha = Math.max(0, f.life) * 0.8;
     ctx.beginPath();
     for (let j = 0; j < f.pts.length; j++) {
-      const r = rot(f.pts[j], f.ang);
+      const r = rotAbout(f.pts[j], 0, 0, f.ang);
       const X = f.x + r.x, Y = f.y + r.y;
       if (j === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
     }
     ctx.strokeStyle = '#8f897f';
-    ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
