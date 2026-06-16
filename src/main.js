@@ -7,6 +7,7 @@ import { enableTilt } from './smoke.js';
 import { initStage, ignite, resetIncense } from './incense.js';
 import { initTimer } from './timer.js';
 import { initJiaobei } from './jiaobei.js';
+import { initTablet } from './tablet.js';
 import { getNfcAction, scanNfc } from './nfc.js';
 import { registerPwa } from './pwa.js';
 
@@ -14,6 +15,7 @@ applyBodyClasses();
 initStage();
 initTimer();
 initJiaobei();
+initTablet();
 registerPwa();
 
 const startBtn = document.getElementById('startBtn');

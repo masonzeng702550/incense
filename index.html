@@ -17,6 +17,14 @@
   <video id="camera" class="camera-only" playsinline muted></video>
   <div id="altarBg" class="static-altar-bg" aria-hidden="true"></div>
 
+  <!-- 牌位（牌位模式時顯示，置於香之後） -->
+  <div id="tablet" class="tablet" aria-hidden="true">
+    <div class="tablet__plaque">
+      <div class="tablet__text" id="tabletText">○○○　往生蓮位</div>
+    </div>
+    <div class="tablet__base"></div>
+  </div>
+
   <!-- 香 + 煙 渲染畫布 -->
   <canvas id="stage"></canvas>
 
@@ -71,6 +79,39 @@
       <span>省電模式（降低動畫）</span>
     </label>
     <p id="weatherInfo" class="weather-info"></p>
+
+    <hr class="divider" />
+    <label class="field field--row">
+      <input id="tabletMode" type="checkbox" />
+      <span>牌位模式（香前移，後置牌位）</span>
+    </label>
+    <div id="tabletOptions" hidden>
+      <div class="field">
+        <span>牌位樣式</span>
+        <div class="seg" id="tabletStyles">
+          <button type="button" class="seg__btn" data-style="lotus">蓮位</button>
+          <button type="button" class="seg__btn" data-style="spirit">神主牌</button>
+          <button type="button" class="seg__btn" data-style="plain">簡約</button>
+        </div>
+      </div>
+      <label class="field">
+        <span>祖先名字</span>
+        <input id="ancestorName" type="text" placeholder="例：王大明" maxlength="12" />
+      </label>
+      <label class="field">
+        <span>稱謂模板</span>
+        <select id="tabletTemplate">
+          <option value="wangsheng">｛名｝往生蓮位</option>
+          <option value="full">｛名｝｛姓｝氏歷代　往生蓮位</option>
+          <option value="lidai">｛姓｝氏歷代祖先</option>
+          <option value="lianwei">｛名｝之蓮位</option>
+          <option value="lingwei">｛名｝之靈位</option>
+          <option value="raw">自訂（直接顯示）</option>
+        </select>
+      </label>
+      <p class="weather-info">牌位設定會記住（存於 cookie）。</p>
+    </div>
+
     <button id="closeSettings" class="btn btn--ghost">關閉</button>
   </aside>
 

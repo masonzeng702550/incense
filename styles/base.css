@@ -7,7 +7,9 @@
   --panel: rgba(26, 15, 10, 0.92);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tip: 16vh;            /* 香頭高度（牌位模式時改變） */
 }
+body.tablet-mode { --tip: 46vh; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,7 +39,42 @@ body.camera-active #camera { display: block; }
 body.camera-active #altarBg { display: none; }
 
 /* 香 + 煙 畫布疊在背景上 */
-#stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+
+/* 牌位（置於香之後：z-index 介於背景與香畫布之間） */
+.tablet {
+  position: fixed; left: 50%; top: 9vh; transform: translateX(-50%);
+  z-index: 1; display: none; flex-direction: column; align-items: center;
+  pointer-events: none; width: min(46vw, 230px);
+}
+body.tablet-mode .tablet { display: flex; }
+.tablet__plaque {
+  width: 100%; min-height: 34vh; padding: 22px 14px 26px;
+  display: flex; justify-content: center;
+  background: linear-gradient(150deg, #4a1410, #2a0d0a);
+  border: 2px solid var(--gold); border-radius: 10px 10px 6px 6px;
+  box-shadow: 0 8px 26px rgba(0,0,0,.5), inset 0 0 18px rgba(0,0,0,.45);
+}
+.tablet__text {
+  writing-mode: vertical-rl; text-orientation: upright;
+  font-family: "Noto Serif TC", "Songti TC", serif;
+  font-size: clamp(20px, 5.4vw, 30px); letter-spacing: 2px; line-height: 1.5;
+  color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,.6);
+  max-height: 30vh;
+}
+.tablet__base {
+  width: 64%; height: 16px; margin-top: -3px;
+  background: linear-gradient(#3a120e, #1d0807);
+  border: 2px solid var(--gold); border-top: none; border-radius: 0 0 8px 8px;
+}
+/* 蓮位：圓拱頂、暖紅 */
+.tablet--lotus .tablet__plaque { border-radius: 60px 60px 8px 8px; background: linear-gradient(150deg, #5a1614, #320f0b); }
+/* 神主牌：深木色、方頂 */
+.tablet--spirit .tablet__plaque { background: linear-gradient(150deg, #3b2a1c, #20160e); border-color: #c8a24a; border-radius: 8px 8px 4px 4px; }
+.tablet--spirit .tablet__text, .tablet--spirit .tablet__base { color: #e6cf8f; }
+.tablet--spirit .tablet__base { border-color: #c8a24a; background: linear-gradient(#2c1f15, #160f09); }
+/* 簡約：黑底細金框 */
+.tablet--plain .tablet__plaque { background: rgba(12,9,7,.9); border-radius: 6px; box-shadow: 0 8px 22px rgba(0,0,0,.5); }
 
 /* 啟動遮罩 */
 .gate {
@@ -124,7 +161,20 @@ body:not(.phase-idle) .gate { display: none; }
 .field { display: flex; flex-direction: column; gap: .5rem; }
 .field--row { flex-direction: row; align-items: center; gap: .75rem; }
 .field input[type=range] { width: 100%; accent-color: var(--temple-red); }
+.field input[type=text], .field select {
+  font: inherit; padding: .55rem .7rem; border-radius: 8px;
+  border: 1px solid rgba(212,175,55,.4); background: rgba(0,0,0,.35); color: var(--text);
+}
 .weather-info { font-size: .85rem; opacity: .75; min-height: 1.2em; }
+.divider { border: none; border-top: 1px solid rgba(212,175,55,.25); margin: .25rem 0; }
+#tabletOptions { display: flex; flex-direction: column; gap: 1rem; }
+.seg { display: flex; gap: .5rem; }
+.seg__btn {
+  flex: 1; font: inherit; font-size: .9rem; padding: .5rem 0; cursor: pointer;
+  border: 1px solid rgba(212,175,55,.4); border-radius: 8px;
+  background: rgba(0,0,0,.35); color: var(--text); transition: background .2s;
+}
+.seg__btn--on { background: var(--temple-red); border-color: var(--gold); font-weight: 700; }
 
 /* 打火機：由螢幕上方往下點（NFC 多在手機上方） */
 .lighter {
@@ -134,8 +184,8 @@ body:not(.phase-idle) .gate { display: none; }
   transition: top .55s cubic-bezier(.34, 1, .5, 1), transform .55s ease;
   pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
 }
-/* 火焰尖端（約在 SVG 底部）對到香頭 16vh */
-.lighter.active { top: calc(16vh - 160px); }
+/* 火焰尖端（約在 SVG 底部）對到香頭；--tip 隨牌位模式調整 */
+.lighter.active { top: calc(var(--tip, 16vh) - 160px); }
 
 /* 火焰預設不顯示，點火時往下竄並跳動 */
 .lighter-flame { opacity: 0; transform-origin: 32px 110px; transition: opacity .15s; }
