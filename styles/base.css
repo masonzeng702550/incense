@@ -99,17 +99,20 @@ body:not(.phase-idle) .gate { display: none; }
   position: fixed; inset: 0; z-index: 30; display: grid; place-content: center; gap: 1rem;
   background: rgba(0,0,0,.5); text-align: center;
 }
-.jiaobei-cups { display: flex; gap: 2rem; justify-content: center; }
-.cup {
-  width: 70px; height: 90px; border-radius: 50% 50% 45% 45%;
-  background: radial-gradient(circle at 40% 30%, #b33, #5a0f0f);
-  box-shadow: inset -6px -8px 14px rgba(0,0,0,.5);
-  display: inline-block;
+.jiaobei-cups { display: flex; gap: 2.5rem; justify-content: center; align-items: flex-end; }
+.cup { width: 120px; height: 80px; display: inline-block; }
+.cup svg { width: 100%; height: 100%; overflow: visible; }
+.cup.rolling { animation: roll .55s ease; }
+@keyframes roll {
+  0% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-46px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
 }
-.cup.up { background: radial-gradient(circle at 40% 30%, #e8c87a, #8a6d20); } /* 正（平面朝上） */
-.cup.rolling { animation: roll .6s ease; }
-@keyframes roll { 0%{transform:rotate(0) translateY(0)} 50%{transform:rotate(360deg) translateY(-40px)} 100%{transform:rotate(720deg) translateY(0)} }
-.jiaobei-text { font-size: 1.5rem; color: var(--gold); font-weight: 700; }
+.cup-face { fill: #9c1f1f; stroke: #d4af37; stroke-opacity: .55; stroke-width: 2; }
+.cup-shine { fill: #fff; opacity: .14; }
+.cup-shadow { fill: #000; opacity: .28; }
+.jiaobei-label { fill: #d4af37; font-size: 13px; letter-spacing: 2px; text-anchor: middle; opacity: .8; }
+.jiaobei-text { font-size: 1.4rem; color: var(--gold); font-weight: 700; letter-spacing: .15em; }
 
 /* 設定面板 */
 .settings {
@@ -128,7 +131,7 @@ body:not(.phase-idle) .gate { display: none; }
   position: fixed; left: 50%; bottom: -180px; z-index: 15;
   transform: translateX(-50%); transition: bottom .5s ease; pointer-events: none;
 }
-.lighter.active { bottom: 38%; }
+.lighter.active { bottom: 64%; }
 .lighter__body { width: 36px; height: 60px; background: linear-gradient(#444, #111); border-radius: 6px; margin: 0 auto; }
 .lighter__flame {
   width: 14px; height: 28px; margin: 0 auto 2px;
