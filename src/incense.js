@@ -30,9 +30,10 @@ export function ignite() {
   if (s.lit) return;
   const lighter = document.getElementById('lighter');
   lighter.classList.add('active');
+  store.set({ igniting: true });
   sound.lighter();
   setTimeout(() => {
-    store.set({ lit: true, phase: 'burning', startTime: performance.now() });
+    store.set({ lit: true, igniting: false, phase: 'burning', startTime: performance.now() });
     document.getElementById('burnStatus').hidden = false;
     setTimeout(() => lighter.classList.remove('active'), 700);
   }, 900);
@@ -40,7 +41,7 @@ export function ignite() {
 
 export function resetIncense() {
   clearSmoke();
-  store.set({ lit: false, phase: 'idle', burnedRatio: 0 });
+  store.set({ lit: false, igniting: false, phase: 'idle', burnedRatio: 0 });
   document.getElementById('burnStatus').hidden = true;
 }
 
@@ -110,54 +111,70 @@ function drawCenser(w, h) {
   ctx.fill();
 }
 
+// 香身飄擺（炭化段越上越偏）
+function wobble(y, now) { return Math.sin(y * 0.045 + now * 0.0012) * 6; }
+
 function drawIncense(w, h) {
   const s = store.get();
   const cx = w / 2;
   const top = h * TIP_TOP;
   const bottom = h * STICK_BOTTOM;
-  const emberY = s.lit ? top + (bottom - top) * s.burnedRatio : top;
+  const ratio = s.burnedRatio;
+  const burning = s.phase === 'burning';
+  const done = s.phase === 'done';
+  const igniting = s.igniting;
+  const emberY = top + (bottom - top) * ratio; // 火星隨燃燒下移
   const now = performance.now();
 
-  // 未燃香身（火星以下）：暖褐，略帶錐度
-  ctx.lineCap = 'round';
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = '#8a5a32';
-  ctx.beginPath();
-  ctx.moveTo(cx, emberY);
-  ctx.lineTo(cx, bottom);
-  ctx.stroke();
+  // 未燃香身（火星以下）：暖褐
+  if (ratio < 1) {
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#8a5a32';
+    ctx.beginPath();
+    ctx.moveTo(cx, (burning || done) ? emberY : top);
+    ctx.lineTo(cx, bottom);
+    ctx.stroke();
+  }
 
-  // 已燃香灰（火星以上）：灰白、隨高度微微飄擺
-  if (s.lit && emberY > top) {
-    ctx.lineWidth = 3.5;
+  // 已燃部分（火星以上 → 頂端）：炭化深色，隨高度微微飄擺
+  if ((burning || done) && emberY > top) {
+    ctx.lineWidth = 3.6;
     ctx.beginPath();
     let started = false;
     for (let y = emberY; y >= top; y -= 4) {
       const prog = (emberY - y) / (emberY - top + 0.001); // 0(火星) → 1(頂)
-      const ax = cx + Math.sin(y * 0.045 + now * 0.0012) * 6 * prog;
+      const ax = cx + wobble(y, now) * prog;
       if (!started) { ctx.moveTo(ax, y); started = true; }
       else ctx.lineTo(ax, y);
     }
-    ctx.strokeStyle = 'rgba(196,190,180,0.7)';
+    ctx.strokeStyle = done ? 'rgba(38,32,28,0.95)' : 'rgba(74,62,54,0.85)';
     ctx.stroke();
+
+    // 黑色香頭：最頂端炭化結點
+    ctx.fillStyle = '#161210';
+    ctx.beginPath();
+    ctx.arc(cx + wobble(top, now), top + 1, 3.4, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  // 火星：呼吸般明滅 + 光暈
-  if (s.lit && s.phase === 'burning') {
+  // 火光：點火動畫（頂端）或燃燒中（火星處）
+  if (burning || igniting) {
+    const glowY = igniting ? top : emberY;
     const breathe = 0.75 + Math.sin(now / 260) * 0.25;
-    const R = 12 * breathe;
-    const glow = ctx.createRadialGradient(cx, emberY, 0, cx, emberY, R);
+    const R = (igniting ? 10 : 12) * breathe;
+    const glow = ctx.createRadialGradient(cx, glowY, 0, cx, glowY, R);
     glow.addColorStop(0, 'rgba(255,255,255,0.95)');
     glow.addColorStop(0.35, `rgba(255,138,43,${0.85 * breathe})`);
     glow.addColorStop(1, 'rgba(255,90,0,0)');
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(cx, emberY, R, 0, Math.PI * 2);
+    ctx.arc(cx, glowY, R, 0, Math.PI * 2);
     ctx.fill();
     // 核心亮點
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(cx, emberY, 2.2, 0, Math.PI * 2);
+    ctx.arc(cx, glowY, 2.2, 0, Math.PI * 2);
     ctx.fill();
   }
 }

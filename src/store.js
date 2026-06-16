@@ -2,6 +2,7 @@
 const state = {
   phase: 'idle',        // idle | igniting | burning | done
   lit: false,
+  igniting: false,      // 打火機點火動畫進行中
   startTime: 0,
   duration: 600,        // 秒
   burnedRatio: 0,       // 0~1
