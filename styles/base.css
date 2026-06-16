@@ -37,7 +37,7 @@ body.camera-active #camera { display: block; }
 body.camera-active #altarBg { display: none; }
 
 /* 香 + 煙 畫布疊在背景上 */
-#stage { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 
 /* 啟動遮罩 */
 .gate {
