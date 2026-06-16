@@ -1,0 +1,14 @@
+{
+  "name": "eco-incense",
+  "version": "1.0.0",
+  "description": "環保電子香 — 可在手機/電腦使用的數位上香 Web App",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
