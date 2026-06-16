@@ -30,9 +30,10 @@ export async function enableTilt() {
   }
 }
 
-// 手機左右傾角 → 升流的橫向偏移（讓煙朝真實上方）
+// 手機左右傾角 → 升流的橫向偏移。
+// 取負號：手機向右轉時，煙相對螢幕往左偏，使其維持朝真實世界上方。
 function tiltLean() {
-  return Math.sin((store.get().tilt.gamma || 0) * (Math.PI / 180)) * 0.5;
+  return -Math.sin((store.get().tilt.gamma || 0) * (Math.PI / 180)) * 0.5;
 }
 
 export function spawnSmoke(x, y) {
