@@ -1,0 +1,23 @@
+/* 能力降級：桌機 / 無對應感測時隱藏手機限定 UI */
+.is-desktop .camera-only { display: none !important; }
+body:not(.has-nfc) .nfc-only { display: none !important; }
+
+/* 手機（直式） */
+@media (max-width: 768px) {
+  .gate__title { font-size: 1.7rem; }
+  .controls { gap: .5rem; }
+  .btn { padding: .7rem 1rem; font-size: .95rem; }
+}
+
+/* 桌機 / 平板：香爐置中、較大留白 */
+@media (min-width: 769px) {
+  .controls { bottom: 2rem; }
+  .gate__title { font-size: 2.4rem; }
+  /* 桌機沒有後鏡頭 AR，靜態神龕背景更顯眼 */
+  .static-altar-bg { filter: brightness(1.05); }
+}
+
+/* 橫式手機提示（可選） */
+@media (max-height: 480px) and (orientation: landscape) {
+  .burn-status { top: .5rem; }
+}

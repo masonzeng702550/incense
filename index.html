@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#8b1a1a" />
+  <meta name="description" content="環保電子香 — 無煙無火的數位上香，供寺廟與信眾使用。" />
+  <title>環保電子香</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icons/icon.svg" />
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/responsive.css" />
+</head>
+<body class="phase-idle">
+  <!-- AR 鏡頭背景（手機） / 靜態背景（桌機・降級） -->
+  <video id="camera" class="camera-only" playsinline muted></video>
+  <div id="altarBg" class="static-altar-bg" aria-hidden="true"></div>
+
+  <!-- 香 + 煙 渲染畫布 -->
+  <canvas id="stage"></canvas>
+
+  <!-- 啟動遮罩：承接 iOS 手勢限制，於此請求權限 -->
+  <div id="gate" class="gate">
+    <div class="gate__card">
+      <h1 class="gate__title">環保電子香</h1>
+      <p class="gate__subtitle">無煙・無火・零空汙的數位參拜</p>
+      <button id="startBtn" class="btn btn--primary">開始參拜</button>
+      <p class="gate__hint">點擊後將請求鏡頭與感測權限（可拒絕）</p>
+    </div>
+  </div>
+
+  <!-- 主要操作列 -->
+  <header class="topbar">
+    <span class="brand">🪔 電子香</span>
+    <button id="muteBtn" class="icon-btn" title="靜音" aria-label="靜音">🔊</button>
+  </header>
+
+  <!-- 燃香狀態 -->
+  <div id="burnStatus" class="burn-status" hidden>
+    <div class="burn-status__bar"><div id="burnFill" class="burn-status__fill"></div></div>
+    <span id="burnText" class="burn-status__text">一炷香 10:00</span>
+  </div>
+
+  <!-- 底部控制 -->
+  <nav class="controls">
+    <button id="lightBtn" class="btn btn--primary">🔥 點香</button>
+    <button id="jiaobeiBtn" class="btn">🥢 擲筊</button>
+    <button id="settingsBtn" class="btn btn--ghost">⚙️ 設定</button>
+  </nav>
+
+  <!-- 擲筊結果 -->
+  <div id="jiaobeiResult" class="jiaobei-result" hidden>
+    <div class="jiaobei-cups"><span id="cupA" class="cup"></span><span id="cupB" class="cup"></span></div>
+    <p id="jiaobeiText" class="jiaobei-text"></p>
+  </div>
+
+  <!-- 設定面板 -->
+  <aside id="settingsPanel" class="settings" hidden>
+    <h2>設定</h2>
+    <label class="field">
+      <span>一炷香時間：<b id="durLabel">10</b> 分鐘</span>
+      <input id="durSlider" type="range" min="1" max="60" value="10" />
+    </label>
+    <label class="field field--row">
+      <input id="autoTime" type="checkbox" />
+      <span>依季節 / 溫度自動推算</span>
+    </label>
+    <label class="field field--row">
+      <input id="ecoMode" type="checkbox" />
+      <span>省電模式（降低動畫）</span>
+    </label>
+    <p id="weatherInfo" class="weather-info"></p>
+    <button id="closeSettings" class="btn btn--ghost">關閉</button>
+  </aside>
+
+  <!-- 打火機 -->
+  <div id="lighter" class="lighter" aria-hidden="true">
+    <div class="lighter__flame"></div>
+    <div class="lighter__body"></div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
