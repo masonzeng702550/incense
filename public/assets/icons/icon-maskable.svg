@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- maskable：重要內容置於中央 80% 安全區 -->
+  <rect width="512" height="512" fill="#1a0f0a"/>
+  <rect x="226" y="170" width="20" height="180" rx="10" fill="#7a4a2b" transform="translate(20,0)"/>
+  <circle cx="256" cy="170" r="18" fill="#ff7a18"/>
+  <circle cx="256" cy="170" r="8" fill="#fff"/>
+  <path d="M256 150 C240 126 280 110 256 86" stroke="#d8d2c8" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.6"/>
+</svg>

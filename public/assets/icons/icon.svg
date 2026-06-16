@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#1a0f0a"/>
+  <circle cx="256" cy="200" r="150" fill="#8b1a1a" opacity="0.25"/>
+  <!-- 香身 -->
+  <rect x="246" y="150" width="20" height="240" rx="10" fill="#7a4a2b"/>
+  <!-- 火星 -->
+  <circle cx="256" cy="150" r="20" fill="#ff7a18"/>
+  <circle cx="256" cy="150" r="9" fill="#fff"/>
+  <!-- 煙 -->
+  <path d="M256 130 C236 100 286 80 256 50 C236 30 276 14 256 0" stroke="#d8d2c8" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <text x="256" y="470" font-family="serif" font-size="64" fill="#d4af37" text-anchor="middle">香</text>
+</svg>

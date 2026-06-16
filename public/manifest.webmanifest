@@ -1,0 +1,16 @@
+{
+  "name": "環保電子香",
+  "short_name": "電子香",
+  "description": "無煙無火的數位上香，供寺廟與信眾使用。",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0f0a",
+  "theme_color": "#8b1a1a",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
