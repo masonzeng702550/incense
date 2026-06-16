@@ -134,8 +134,8 @@ body:not(.phase-idle) .gate { display: none; }
   transition: top .55s cubic-bezier(.34, 1, .5, 1), transform .55s ease;
   pointer-events: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
 }
-/* 火星起始於畫面上方 34vh，火焰頂端對到香頭 */
-.lighter.active { top: calc(34vh - 18px); }
+/* 火星起始於畫面上方 16vh，火焰頂端對到香頭 */
+.lighter.active { top: calc(16vh - 6px); }
 
 /* 火焰預設不顯示，點火時跳動 */
 .lighter-flame { opacity: 0; transform-origin: 32px 62px; transition: opacity .15s; }

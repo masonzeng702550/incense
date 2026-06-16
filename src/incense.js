@@ -1,14 +1,18 @@
-// F2 / F4 — 一炷香（置中、爐中升起、火星下移、香灰飄擺）
+// F2 / F4 — 一炷長香（香爐在底、香身錐度兩色、火星下移、香灰累積後斷落）
 import { store } from './store.js';
 import { sound } from './sound.js';
 import { spawnSmoke, renderSmoke, clearSmoke } from './smoke.js';
 
 let canvas, ctx, raf;
 
-// 版面比例（相對畫面高度）：香身中點對齊畫面正中 0.5
-const TIP_TOP = 0.34;      // 起始香頭（最高點）
-const STICK_BOTTOM = 0.66; // 插入香爐處（中點 = 0.5）
-const CENSER_Y = 0.66;
+// 版面比例（相對畫面高度）：長香，香爐貼近手機底部
+const STICK_TOP = 0.16;   // 起始香頭（最高點）
+const CENSER_TOP = 0.86;  // 香爐口（其下延伸至畫面底部）
+
+// 香灰：累積到一定長度便斷落
+let attachedAsh = 0;        // 目前懸掛的香灰長度（px）
+const ASH_MAX = 46;
+const ashFlakes = [];       // 飄落的灰燼
 
 export function initStage() {
   canvas = document.getElementById('stage');
@@ -41,23 +45,25 @@ export function ignite() {
 
 export function resetIncense() {
   clearSmoke();
+  ashFlakes.length = 0;
+  attachedAsh = 0;
   store.set({ lit: false, igniting: false, phase: 'idle', burnedRatio: 0 });
   document.getElementById('burnStatus').hidden = true;
 }
 
-// 火星座標（隨燃燒下移）
-function emberPos(w, h) {
+function emberY(h) {
   const s = store.get();
-  const top = h * TIP_TOP;
-  const bottom = h * STICK_BOTTOM;
-  return { x: w / 2, y: top + (bottom - top) * s.burnedRatio };
+  return h * STICK_TOP + h * (CENSER_TOP - STICK_TOP) * s.burnedRatio;
 }
+
+// 香身輕微擺動
+function wobble(y, now) { return Math.sin(y * 0.04 + now * 0.0011) * 5; }
 
 function loop() {
   const w = window.innerWidth, h = window.innerHeight;
   const s = store.get();
 
-  // 殘影（F8）：快速移動時不完全清除，疊半透明
+  // 殘影（F8）：快速移動時不完全清除
   if (s.fastMove && s.lit) {
     ctx.fillStyle = 'rgba(0,0,0,0.12)';
     ctx.fillRect(0, 0, w, h);
@@ -76,105 +82,180 @@ function loop() {
   drawCenser(w, h);
   drawIncense(w, h);
 
-  if (s.lit) {
-    const e = emberPos(w, h);
-    spawnSmoke(e.x, e.y);
-  }
+  if (s.lit) spawnSmoke(w / 2, emberY(h));
   renderSmoke(ctx, w, h);
+  renderAshFlakes();
 
   raf = requestAnimationFrame(loop);
 }
 
 function drawCenser(w, h) {
   const cx = w / 2;
-  const y = h * CENSER_Y;
-  const rw = Math.min(120, w * 0.26); // 半寬
-  // 爐身（梯形碗）
+  const y = h * CENSER_TOP;
+  const rw = Math.min(160, w * 0.34);
+  // 爐身（碗形，向下延伸至畫面底部）
   ctx.beginPath();
   ctx.moveTo(cx - rw, y);
-  ctx.lineTo(cx + rw, y);
-  ctx.lineTo(cx + rw * 0.78, y + 46);
-  ctx.lineTo(cx - rw * 0.78, y + 46);
+  ctx.quadraticCurveTo(cx - rw * 1.04, y + (h - y) * 0.55, cx - rw * 0.66, h);
+  ctx.lineTo(cx + rw * 0.66, h);
+  ctx.quadraticCurveTo(cx + rw * 1.04, y + (h - y) * 0.55, cx + rw, y);
   ctx.closePath();
-  ctx.fillStyle = 'rgba(28,18,12,0.92)';
+  ctx.fillStyle = 'rgba(30,20,14,0.95)';
+  ctx.fill();
+  // 爐內香灰
+  ctx.fillStyle = 'rgba(64,55,48,0.95)';
+  ctx.beginPath();
+  ctx.ellipse(cx, y, rw - 6, 9, 0, 0, Math.PI * 2);
   ctx.fill();
   // 爐口金線
-  ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(212,175,55,0.55)';
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.ellipse(cx, y, rw, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, y, rw, 9, 0, 0, Math.PI * 2);
   ctx.stroke();
-  // 爐內陰影
-  ctx.fillStyle = 'rgba(0,0,0,0.5)';
-  ctx.beginPath();
-  ctx.ellipse(cx, y, rw - 6, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
 }
 
-// 香身飄擺（炭化段越上越偏）
-function wobble(y, now) { return Math.sin(y * 0.045 + now * 0.0012) * 6; }
+// 錐度兩色香身（上段香粉褐、下段竹枝紅），有高光，看起來立體
+function drawStick(cx, topY, h) {
+  const censerY = h * CENSER_TOP;
+  const wTop = 2.2, wBot = 3.8;
+  const len = censerY - (h * STICK_TOP);
+  const tShade = (yy) => (yy - h * STICK_TOP) / len; // 0頂→1底
+  const wAt = (yy) => wTop + (wBot - wTop) * tShade(yy);
+
+  ctx.beginPath();
+  ctx.moveTo(cx - wAt(topY), topY);
+  ctx.lineTo(cx - wBot, censerY + 4);
+  ctx.lineTo(cx + wBot, censerY + 4);
+  ctx.lineTo(cx + wAt(topY), topY);
+  ctx.closePath();
+  const g = ctx.createLinearGradient(0, h * STICK_TOP, 0, censerY);
+  g.addColorStop(0, '#a9743f');
+  g.addColorStop(0.55, '#8a5a32');
+  g.addColorStop(0.72, '#6b3f24');
+  g.addColorStop(0.74, '#8c2222'); // 竹枝染紅
+  g.addColorStop(1, '#5a1414');
+  ctx.fillStyle = g;
+  ctx.fill();
+  // 高光
+  ctx.strokeStyle = 'rgba(255,222,180,0.22)';
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(cx - wAt(topY) * 0.4, topY);
+  ctx.lineTo(cx - wBot * 0.4, censerY);
+  ctx.stroke();
+}
 
 function drawIncense(w, h) {
   const s = store.get();
   const cx = w / 2;
-  const top = h * TIP_TOP;
-  const bottom = h * STICK_BOTTOM;
-  const ratio = s.burnedRatio;
+  const top = h * STICK_TOP;
+  const eY = emberY(h);
   const burning = s.phase === 'burning';
   const done = s.phase === 'done';
   const igniting = s.igniting;
-  const emberY = top + (bottom - top) * ratio; // 火星隨燃燒下移
   const now = performance.now();
 
-  // 未燃香身（火星以下）：暖褐
-  if (ratio < 1) {
-    ctx.lineCap = 'round';
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = '#8a5a32';
-    ctx.beginPath();
-    ctx.moveTo(cx, (burning || done) ? emberY : top);
-    ctx.lineTo(cx, bottom);
-    ctx.stroke();
+  // 未燃香身（火星以下 → 香爐）
+  if (s.burnedRatio < 1) {
+    drawStick(cx, (burning || done) ? eY : top, h);
   }
 
-  // 已燃部分（火星以上 → 頂端）：炭化深色，隨高度微微飄擺
-  if ((burning || done) && emberY > top) {
-    ctx.lineWidth = 3.6;
+  // 香灰累積 + 斷落
+  if (burning) {
+    attachedAsh += 0.18;
+    if (attachedAsh > ASH_MAX) {
+      const ashTopY = eY - attachedAsh;
+      dropAsh(cx, ashTopY, eY - 10, now);
+      attachedAsh = 6;
+    }
+  }
+
+  // 懸掛的香灰（火星上方，灰白、會擺動，頂端炭化）
+  if (burning && attachedAsh > 2) {
+    const ashTopY = eY - attachedAsh;
+    ctx.lineWidth = 3; ctx.lineCap = 'round';
     ctx.beginPath();
     let started = false;
-    for (let y = emberY; y >= top; y -= 4) {
-      const prog = (emberY - y) / (emberY - top + 0.001); // 0(火星) → 1(頂)
-      const ax = cx + wobble(y, now) * prog;
-      if (!started) { ctx.moveTo(ax, y); started = true; }
-      else ctx.lineTo(ax, y);
+    for (let y = eY; y >= ashTopY; y -= 4) {
+      const prog = (eY - y) / attachedAsh;
+      const ax = cx + wobble(y, now) * prog * 1.5;
+      if (!started) { ctx.moveTo(ax, y); started = true; } else ctx.lineTo(ax, y);
     }
-    ctx.strokeStyle = done ? 'rgba(38,32,28,0.95)' : 'rgba(74,62,54,0.85)';
+    ctx.strokeStyle = 'rgba(150,144,134,0.7)';
     ctx.stroke();
-
-    // 黑色香頭：最頂端炭化結點
-    ctx.fillStyle = '#161210';
+    // 炭化灰頭
+    ctx.fillStyle = '#2a2421';
     ctx.beginPath();
-    ctx.arc(cx + wobble(top, now), top + 1, 3.4, 0, Math.PI * 2);
+    ctx.arc(cx + wobble(ashTopY, now) * 1.5, ashTopY, 2.3, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // 火光：點火動畫（頂端）或燃燒中（火星處）
+  // 燒盡：香爐中留一小截炭黑殘香，無火光
+  if (done) {
+    const stubTop = h * CENSER_TOP - 34;
+    ctx.lineCap = 'round'; ctx.lineWidth = 4;
+    ctx.strokeStyle = '#2a2320';
+    ctx.beginPath();
+    ctx.moveTo(cx, stubTop);
+    ctx.lineTo(cx, h * CENSER_TOP);
+    ctx.stroke();
+    ctx.fillStyle = '#161210';
+    ctx.beginPath();
+    ctx.arc(cx, stubTop, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 火光：點火動畫（頂端）或燃燒中火星（小巧內斂）
   if (burning || igniting) {
-    const glowY = igniting ? top : emberY;
-    const breathe = 0.75 + Math.sin(now / 260) * 0.25;
-    const R = (igniting ? 10 : 12) * breathe;
+    const glowY = igniting ? top : eY;
+    const breathe = 0.78 + Math.sin(now / 240) * 0.22;
+    const R = (igniting ? 9 : 7) * breathe;
     const glow = ctx.createRadialGradient(cx, glowY, 0, cx, glowY, R);
-    glow.addColorStop(0, 'rgba(255,255,255,0.95)');
-    glow.addColorStop(0.35, `rgba(255,138,43,${0.85 * breathe})`);
-    glow.addColorStop(1, 'rgba(255,90,0,0)');
+    glow.addColorStop(0, 'rgba(255,245,210,0.95)');
+    glow.addColorStop(0.4, `rgba(255,130,40,${0.8 * breathe})`);
+    glow.addColorStop(1, 'rgba(255,80,0,0)');
     ctx.fillStyle = glow;
     ctx.beginPath();
     ctx.arc(cx, glowY, R, 0, Math.PI * 2);
     ctx.fill();
-    // 核心亮點
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#fff6e0';
     ctx.beginPath();
-    ctx.arc(cx, glowY, 2.2, 0, Math.PI * 2);
+    ctx.arc(cx, glowY, 1.8, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+// 一段香灰斷落，化為飄落的灰燼
+function dropAsh(cx, fromY, toY, now) {
+  const n = 5 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < n; i++) {
+    const y = fromY + Math.random() * (toY - fromY);
+    ashFlakes.push({
+      x: cx + wobble(y, now) + (Math.random() - 0.5) * 5,
+      y,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: 0.3 + Math.random() * 0.6,
+      life: 1,
+      decay: 0.005 + Math.random() * 0.006,
+      size: 1.1 + Math.random() * 1.5,
+    });
+  }
+}
+
+function renderAshFlakes() {
+  for (let i = ashFlakes.length - 1; i >= 0; i--) {
+    const f = ashFlakes[i];
+    f.vy += 0.018;       // 重力
+    f.vx += Math.sin(f.y * 0.05) * 0.01; // 飄移
+    f.x += f.vx; f.y += f.vy;
+    f.life -= f.decay;
+    if (f.life <= 0) { ashFlakes.splice(i, 1); continue; }
+    ctx.globalAlpha = f.life * 0.7;
+    ctx.fillStyle = '#9a948a';
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 }
