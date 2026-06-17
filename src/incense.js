@@ -58,8 +58,9 @@ export function ignite() {
 
 export function resetIncense() {
   clearSmoke();
-  fallingAsh.length = 0; settledAsh.length = 0; debris.length = 0; sparks.length = 0;
-  ashNodes = null; shakeAccum = 0; ashPile = 0;
+  // 爐中已堆積的香灰（settledAsh / ashPile）保留 → 多次上香持續變多
+  fallingAsh.length = 0; debris.length = 0; sparks.length = 0;
+  ashNodes = null; shakeAccum = 0;
   store.set({ lit: false, igniting: false, phase: 'idle', burnedRatio: 0 });
   document.getElementById('burnStatus').hidden = true;
 }
@@ -178,15 +179,19 @@ function drawCenser(w, h) {
   ctx.strokeStyle = 'rgba(120,85,30,0.7)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.ellipse(cx, rimY, rim - 3.5, 5.5, 0, 0, Math.PI * 2); ctx.stroke();
 
-  // 爐內香灰（堆積）
-  ctx.fillStyle = '#6a625a';
+  // 爐內香灰（隨掉落越堆越高、越寬，會漸漸高過爐口）
+  ctx.fillStyle = '#5f574e';
   ctx.beginPath(); ctx.ellipse(cx, rimY, rim - 6, 5, 0, 0, Math.PI * 2); ctx.fill();
-  if (ashPile > 0) {
-    const moundH = 3 + ashPile * 9;
-    ctx.fillStyle = '#837b70';
-    ctx.beginPath(); ctx.ellipse(cx, rimY - moundH * 0.4, (rim - 7) * 0.8, moundH * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+  if (ashPile > 0.01) {
+    const mH = 4 + ashPile * 26;                       // 灰丘高度
+    const mW = (rim - 5) * (0.6 + ashPile * 0.45);     // 灰丘寬度
+    ctx.fillStyle = '#766e65';
+    ctx.beginPath(); ctx.ellipse(cx, rimY - mH * 0.35, mW, mH * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#8a8278';
+    ctx.beginPath(); ctx.ellipse(cx, rimY - mH * 0.6, mW * 0.62, mH * 0.32, 0, 0, Math.PI * 2); ctx.fill();
   }
-  ctx.fillStyle = '#8f897f';
+  // 散落的灰屑（疊在灰丘上）
+  ctx.fillStyle = '#9a948a';
   for (const p of settledAsh) {
     ctx.beginPath(); ctx.arc(cx + p.dx, rimY - p.up, p.r, 0, Math.PI * 2); ctx.fill();
   }
@@ -367,12 +372,15 @@ function renderFallingAsh(w, h) {
     f.vy += 0.022; f.va *= 0.99;
     f.x += f.vx; f.y += f.vy; f.ang += f.va;
     f.life -= 0.0015;
-    if (f.y >= rimY) {           // 落入香爐 → 堆積
-      ashPile = Math.min(1, ashPile + 0.05);
-      for (let k = 0; k < 2; k++) {
-        settledAsh.push({ dx: (Math.random() - 0.5) * (rim * 1.2), up: Math.random() * ashPile * 8, r: 1 + Math.random() * 1.4 });
+    if (f.y >= rimY) {           // 落入香爐 → 堆積（越掉越多）
+      ashPile = Math.min(1, ashPile + 0.06);
+      const n = 3 + Math.floor(Math.random() * 3);
+      for (let k = 0; k < n; k++) {
+        const dx = (Math.random() - 0.5) * (rim * 1.6);
+        const heap = Math.max(0, 1 - Math.abs(dx) / (rim * 1.1)); // 中央堆得高
+        settledAsh.push({ dx, up: 2 + heap * ashPile * 20 + Math.random() * 2, r: 1.1 + Math.random() * 1.6 });
       }
-      if (settledAsh.length > 28) settledAsh.splice(0, settledAsh.length - 28);
+      if (settledAsh.length > 120) settledAsh.splice(0, settledAsh.length - 120);
       fallingAsh.splice(i, 1); continue;
     }
     if (f.life <= 0) { fallingAsh.splice(i, 1); continue; }
