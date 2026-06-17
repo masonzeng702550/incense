@@ -19,8 +19,14 @@
 
   <!-- 牌位（牌位模式時顯示，置於香之後） -->
   <div id="tablet" class="tablet" aria-hidden="true">
-    <div class="tablet__plaque">
-      <div class="tablet__text" id="tabletText">○○○　往生蓮位</div>
+    <div class="tablet__frame">
+      <div class="tablet__inner">
+        <div class="tablet__cols">
+          <div class="tablet__col tablet__lineage" id="tabletLineage">○氏歷代</div>
+          <div class="tablet__col tablet__name" id="tabletName">○○○</div>
+        </div>
+        <div class="tablet__suffix" id="tabletSuffix">往生蓮位</div>
+      </div>
     </div>
     <div class="tablet__base"></div>
   </div>
@@ -109,12 +115,11 @@
       <label class="field">
         <span>稱謂模板</span>
         <select id="tabletTemplate">
-          <option value="wangsheng">｛名｝往生蓮位</option>
-          <option value="full">｛名｝｛姓｝氏歷代　往生蓮位</option>
-          <option value="lidai">｛姓｝氏歷代祖先</option>
-          <option value="lianwei">｛名｝之蓮位</option>
-          <option value="lingwei">｛名｝之靈位</option>
-          <option value="raw">自訂（直接顯示）</option>
+          <option value="wangsheng">｛名｝＋｛姓｝氏歷代＋往生蓮位</option>
+          <option value="lianwei">｛名｝＋之蓮位</option>
+          <option value="lidai">｛姓｝氏歷代祖先＋之蓮位</option>
+          <option value="lingwei">｛名｝＋之靈位</option>
+          <option value="raw">自訂（只顯示名字）</option>
         </select>
       </label>
       <p class="weather-info">牌位設定會記住（存於 cookie）。</p>

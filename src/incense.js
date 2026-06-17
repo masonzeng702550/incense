@@ -100,59 +100,85 @@ function loop() {
   raf = requestAnimationFrame(loop);
 }
 
-// 小香爐：甕形爐身 + 兩耳 + 三足 + 爐口金邊 + 爐中香灰
+// 小香爐：銅質甕形爐身 + 兩耳金環 + 三足 + 爐口金邊 + 爐中香灰
 function drawCenser(w, h) {
   const cx = w / 2;
   const rimY = h * CENSER_TOP;
   const rim = censerRim(w);
-  const belly = rim * 1.3;
-  const bodyH = 52;
+  const belly = rim * 1.32;
+  const bodyH = 54;
   const botY = rimY + bodyH;
 
-  // 兩耳
-  ctx.strokeStyle = '#caa24a'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.arc(cx - rim, rimY + 6, 9, Math.PI * 0.5, Math.PI * 1.5); ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx + rim, rimY + 6, 9, Math.PI * 1.5, Math.PI * 2.5); ctx.stroke();
-
-  // 爐身（甕）
-  ctx.beginPath();
-  ctx.moveTo(cx - rim, rimY);
-  ctx.bezierCurveTo(cx - belly, rimY + bodyH * 0.4, cx - belly * 0.8, botY - 6, cx - rim * 0.55, botY);
-  ctx.lineTo(cx + rim * 0.55, botY);
-  ctx.bezierCurveTo(cx + belly * 0.8, botY - 6, cx + belly, rimY + bodyH * 0.4, cx + rim, rimY);
-  ctx.closePath();
-  const g = ctx.createLinearGradient(cx - belly, 0, cx + belly, 0);
-  g.addColorStop(0, '#2c1d12');
-  g.addColorStop(0.45, '#6e4f30');
-  g.addColorStop(0.55, '#7a5a38');
-  g.addColorStop(1, '#241710');
-  ctx.fillStyle = g; ctx.fill();
-  ctx.strokeStyle = 'rgba(202,162,74,0.5)'; ctx.lineWidth = 1.5; ctx.stroke();
-
-  // 三足
-  ctx.fillStyle = '#241710';
-  for (const dxLeg of [-rim * 0.5, 0, rim * 0.5]) {
+  const body = () => {
     ctx.beginPath();
-    ctx.moveTo(cx + dxLeg - 4, botY - 3);
-    ctx.lineTo(cx + dxLeg + 4, botY - 3);
-    ctx.lineTo(cx + dxLeg + 2, botY + 9);
-    ctx.lineTo(cx + dxLeg - 2, botY + 9);
+    ctx.moveTo(cx - rim, rimY);
+    ctx.bezierCurveTo(cx - belly, rimY + bodyH * 0.42, cx - belly * 0.82, botY - 6, cx - rim * 0.52, botY);
+    ctx.lineTo(cx + rim * 0.52, botY);
+    ctx.bezierCurveTo(cx + belly * 0.82, botY - 6, cx + belly, rimY + bodyH * 0.42, cx + rim, rimY);
+    ctx.closePath();
+  };
+
+  // 兩耳（金環）
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#d8b250'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(cx - rim, rimY + 7, 10, Math.PI * 0.45, Math.PI * 1.55); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + rim, rimY + 7, 10, Math.PI * 1.45, Math.PI * 2.55); ctx.stroke();
+  ctx.strokeStyle = 'rgba(70,48,16,0.6)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx - rim, rimY + 7, 10, Math.PI * 0.45, Math.PI * 1.55); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx + rim, rimY + 7, 10, Math.PI * 1.45, Math.PI * 2.55); ctx.stroke();
+
+  // 三足（先畫，露於爐身下）
+  for (const d of [-rim * 0.5, 0, rim * 0.5]) {
+    const lx = cx + d;
+    const lg = ctx.createLinearGradient(lx - 4, 0, lx + 4, 0);
+    lg.addColorStop(0, '#160b04'); lg.addColorStop(0.5, '#4a3119'); lg.addColorStop(1, '#120803');
+    ctx.fillStyle = lg;
+    ctx.beginPath();
+    ctx.moveTo(lx - 4, botY - 5); ctx.lineTo(lx + 4, botY - 5);
+    ctx.lineTo(lx + 2.5, botY + 11); ctx.lineTo(lx - 2.5, botY + 11);
     ctx.closePath(); ctx.fill();
   }
 
-  // 爐口金邊
-  ctx.strokeStyle = 'rgba(212,175,55,0.7)'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.ellipse(cx, rimY, rim, 7, 0, 0, Math.PI * 2); ctx.stroke();
+  // 爐身（橫向銅色漸層）
+  body();
+  const g = ctx.createLinearGradient(cx - belly, 0, cx + belly, 0);
+  g.addColorStop(0, '#221007');
+  g.addColorStop(0.28, '#5a3c20');
+  g.addColorStop(0.46, '#8c6738');
+  g.addColorStop(0.54, '#9e7940');
+  g.addColorStop(0.72, '#583a1f');
+  g.addColorStop(1, '#1b0d05');
+  ctx.fillStyle = g; ctx.fill();
+  // 底部加深
+  body();
+  const vg = ctx.createLinearGradient(0, rimY, 0, botY);
+  vg.addColorStop(0, 'rgba(255,222,165,0.12)');
+  vg.addColorStop(0.5, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = vg; ctx.fill();
+  // 高光
+  ctx.fillStyle = 'rgba(255,236,198,0.22)';
+  ctx.beginPath(); ctx.ellipse(cx - rim * 0.4, rimY + bodyH * 0.42, rim * 0.16, bodyH * 0.22, -0.3, 0, Math.PI * 2); ctx.fill();
+  // 輪廓
+  body();
+  ctx.strokeStyle = 'rgba(212,175,55,0.4)'; ctx.lineWidth = 1.5; ctx.stroke();
 
-  // 爐內香灰（隨掉落堆積成小丘）
-  ctx.fillStyle = '#5f574e';
-  ctx.beginPath(); ctx.ellipse(cx, rimY, rim - 5, 6, 0, 0, Math.PI * 2); ctx.fill();
+  // 爐口：內陰影 + 金邊
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.beginPath(); ctx.ellipse(cx, rimY, rim - 3, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#d8b250'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(cx, rimY, rim, 7, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,85,30,0.7)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(cx, rimY, rim - 3.5, 5.5, 0, 0, Math.PI * 2); ctx.stroke();
+
+  // 爐內香灰（堆積）
+  ctx.fillStyle = '#6a625a';
+  ctx.beginPath(); ctx.ellipse(cx, rimY, rim - 6, 5, 0, 0, Math.PI * 2); ctx.fill();
   if (ashPile > 0) {
     const moundH = 3 + ashPile * 9;
-    ctx.fillStyle = '#7d756b';
-    ctx.beginPath(); ctx.ellipse(cx, rimY - moundH * 0.4, (rim - 6) * 0.8, moundH * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#837b70';
+    ctx.beginPath(); ctx.ellipse(cx, rimY - moundH * 0.4, (rim - 7) * 0.8, moundH * 0.5, 0, 0, Math.PI * 2); ctx.fill();
   }
-  // 落定的灰屑
   ctx.fillStyle = '#8f897f';
   for (const p of settledAsh) {
     ctx.beginPath(); ctx.arc(cx + p.dx, rimY - p.up, p.r, 0, Math.PI * 2); ctx.fill();
@@ -163,28 +189,42 @@ function drawStick(cx, topY, h) {
   const censerY = h * CENSER_TOP;
   const fullTop = h * topFrac();
   const len = censerY - fullTop;
-  const wTop = 2.4, wBot = 3.8;
+  const wTop = 2.6, wBot = 4.2;
   const wAt = (yy) => wTop + (wBot - wTop) * ((yy - fullTop) / len);
+  const wT = wAt(topY);
+  const path = () => {
+    ctx.beginPath();
+    ctx.moveTo(cx - wT, topY);
+    ctx.lineTo(cx - wBot, censerY + 4);
+    ctx.lineTo(cx + wBot, censerY + 4);
+    ctx.lineTo(cx + wT, topY);
+    ctx.closePath();
+  };
 
-  ctx.beginPath();
-  ctx.moveTo(cx - wAt(topY), topY);
-  ctx.lineTo(cx - wBot, censerY + 4);
-  ctx.lineTo(cx + wBot, censerY + 4);
-  ctx.lineTo(cx + wAt(topY), topY);
-  ctx.closePath();
+  // 1) 長向兩色（香粉褐 → 竹枝紅）
+  path();
   const g = ctx.createLinearGradient(0, fullTop, 0, censerY);
-  g.addColorStop(0, '#a9743f');
-  g.addColorStop(0.55, '#8a5a32');
+  g.addColorStop(0, '#b07a44');
+  g.addColorStop(0.5, '#8a5a32');
   g.addColorStop(0.72, '#6b3f24');
-  g.addColorStop(0.74, '#8c2222');
-  g.addColorStop(1, '#5a1414');
+  g.addColorStop(0.74, '#90282a');
+  g.addColorStop(1, '#5c1618');
   ctx.fillStyle = g; ctx.fill();
-  ctx.strokeStyle = 'rgba(255,222,180,0.22)';
-  ctx.lineWidth = 0.9;
-  ctx.beginPath();
-  ctx.moveTo(cx - wAt(topY) * 0.4, topY);
-  ctx.lineTo(cx - wBot * 0.4, censerY);
-  ctx.stroke();
+
+  // 2) 橫向圓柱光影（中間亮、兩側暗）
+  path();
+  const cyl = ctx.createLinearGradient(cx - wBot, 0, cx + wBot, 0);
+  cyl.addColorStop(0, 'rgba(0,0,0,0.45)');
+  cyl.addColorStop(0.34, 'rgba(255,228,185,0.18)');
+  cyl.addColorStop(0.5, 'rgba(255,238,205,0.3)');
+  cyl.addColorStop(0.7, 'rgba(0,0,0,0.06)');
+  cyl.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = cyl; ctx.fill();
+
+  // 3) 邊緣描線
+  path();
+  ctx.strokeStyle = 'rgba(20,10,5,0.5)';
+  ctx.lineWidth = 0.8; ctx.stroke();
 }
 
 function maxAshLen(h) { return (h * CENSER_TOP - h * topFrac()) / 10; }

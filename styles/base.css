@@ -43,38 +43,66 @@ body.camera-active #altarBg { display: none; }
 
 /* 牌位（置於香之後：z-index 介於背景與香畫布之間） */
 .tablet {
-  position: fixed; left: 50%; top: 9vh; transform: translateX(-50%);
+  position: fixed; left: 50%; top: 8vh; transform: translateX(-50%);
   z-index: 1; display: none; flex-direction: column; align-items: center;
-  pointer-events: none; width: min(46vw, 230px);
+  pointer-events: none; width: min(54vw, 250px);
+  --tablet-bg: linear-gradient(150deg, #58181a 0%, #3a0f10 55%, #2a0a0b 100%);
+  --tablet-edge: var(--gold);
+  --tablet-ink: #f3d98a;
 }
 body.tablet-mode .tablet { display: flex; }
-.tablet__plaque {
-  width: 100%; min-height: 34vh; padding: 22px 14px 26px;
-  display: flex; justify-content: center;
-  background: linear-gradient(150deg, #4a1410, #2a0d0a);
-  border: 2px solid var(--gold); border-radius: 10px 10px 6px 6px;
-  box-shadow: 0 8px 26px rgba(0,0,0,.5), inset 0 0 18px rgba(0,0,0,.45);
+
+/* 外框（粗金邊） + 內框線 */
+.tablet__frame {
+  width: 100%;
+  background: var(--tablet-bg);
+  border: 3px solid var(--tablet-edge);
+  border-radius: 14px 14px 6px 6px;
+  padding: 7px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.55), inset 0 0 22px rgba(0,0,0,.5);
 }
-.tablet__text {
+.tablet__inner {
+  border: 1.5px solid color-mix(in srgb, var(--tablet-edge) 60%, transparent);
+  border-radius: 9px 9px 4px 4px;
+  padding: 20px 12px 24px;
+  min-height: 30vh;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.tablet__cols { display: flex; justify-content: center; align-items: flex-start; gap: 4px; }
+.tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
   font-family: "Noto Serif TC", "Songti TC", serif;
-  font-size: clamp(20px, 5.4vw, 30px); letter-spacing: 2px; line-height: 1.5;
-  color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,.6);
-  max-height: 30vh;
+  color: var(--tablet-ink); text-shadow: 0 1px 2px rgba(0,0,0,.65);
+  line-height: 1.4;
 }
+.tablet__name { font-size: clamp(24px, 6.2vw, 32px); letter-spacing: 1px; }
+.tablet__lineage { font-size: clamp(15px, 3.8vw, 19px); opacity: .92; }
+.tablet__suffix { font-size: clamp(21px, 5.4vw, 28px); letter-spacing: 2px; margin-top: 2px; }
+/* 底座 */
 .tablet__base {
-  width: 64%; height: 16px; margin-top: -3px;
-  background: linear-gradient(#3a120e, #1d0807);
-  border: 2px solid var(--gold); border-top: none; border-radius: 0 0 8px 8px;
+  width: 70%; height: 18px; margin-top: -2px;
+  background: linear-gradient(#3a120e, #1c0706);
+  border: 3px solid var(--tablet-edge); border-top: none;
+  border-radius: 0 0 10px 10px;
 }
-/* 蓮位：圓拱頂、暖紅 */
-.tablet--lotus .tablet__plaque { border-radius: 60px 60px 8px 8px; background: linear-gradient(150deg, #5a1614, #320f0b); }
-/* 神主牌：深木色、方頂 */
-.tablet--spirit .tablet__plaque { background: linear-gradient(150deg, #3b2a1c, #20160e); border-color: #c8a24a; border-radius: 8px 8px 4px 4px; }
-.tablet--spirit .tablet__text, .tablet--spirit .tablet__base { color: #e6cf8f; }
-.tablet--spirit .tablet__base { border-color: #c8a24a; background: linear-gradient(#2c1f15, #160f09); }
+
+/* 蓮位：圓拱頂、暖紅金 */
+.tablet--lotus .tablet__frame { border-radius: 70px 70px 6px 6px; }
+.tablet--lotus .tablet__inner { border-radius: 60px 60px 4px 4px; }
+/* 神主牌：深木色、方頂、淡金字 */
+.tablet--spirit {
+  --tablet-bg: linear-gradient(150deg, #43301f, #241811);
+  --tablet-edge: #c9a24c; --tablet-ink: #ecd79a;
+}
+.tablet--spirit .tablet__frame { border-radius: 8px 8px 4px 4px; }
+.tablet--spirit .tablet__inner { border-radius: 5px; }
 /* 簡約：黑底細金框 */
-.tablet--plain .tablet__plaque { background: rgba(12,9,7,.9); border-radius: 6px; box-shadow: 0 8px 22px rgba(0,0,0,.5); }
+.tablet--plain {
+  --tablet-bg: rgba(14,10,8,.92);
+  --tablet-edge: var(--gold); --tablet-ink: var(--gold);
+}
+.tablet--plain .tablet__frame { border-width: 2px; border-radius: 6px; }
+.tablet--plain .tablet__inner { border-radius: 4px; }
 
 /* 啟動遮罩 */
 .gate {
