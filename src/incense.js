@@ -10,7 +10,7 @@ const STICK_TOP_NORMAL = 0.16;
 const STICK_TOP_TABLET = 0.46;  // 牌位模式：香前移、變短
 const CENSER_TOP = 0.84;
 function topFrac() { return store.get().tabletMode ? STICK_TOP_TABLET : STICK_TOP_NORMAL; }
-function censerRim(w) { return Math.min(60, w * 0.15); }
+function censerRim(w) { return Math.max(12, Math.min(60, w * 0.15)); }
 
 // 香灰節點：以「相對香的座標」儲存 → 縮放/視窗變動時跟著香，不位移
 // dx = 相對中軸的水平偏移；fy = 相對畫面高度的比例
@@ -72,30 +72,37 @@ function emberY(h) {
 
 function loop() {
   const w = window.innerWidth, h = window.innerHeight;
+  // 尺寸尚未就緒（首次繪製/PWA 啟動）→ 跳過此幀，但保持迴圈
+  if (w < 2 || h < 2) { raf = requestAnimationFrame(loop); return; }
   const s = store.get();
 
-  if (s.fastMove && s.lit) {
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    ctx.fillRect(0, 0, w, h);
-  } else {
-    ctx.clearRect(0, 0, w, h);
+  // 單一幀的繪製錯誤絕不可中斷迴圈（否則整個 app 會卡死）
+  try {
+    if (s.fastMove && s.lit) {
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(0, 0, w, h);
+    } else {
+      ctx.clearRect(0, 0, w, h);
+    }
+
+    if (s.lit && s.phase === 'burning') {
+      const elapsed = (performance.now() - s.startTime) / 1000;
+      const ratio = Math.min(1, elapsed / s.duration);
+      if (ratio !== s.burnedRatio) store.set({ burnedRatio: ratio });
+      if (ratio >= 1) store.set({ phase: 'done', lit: false });
+    }
+
+    drawIncense(w, h);  // 香身、香灰、火星、黑炭頭（黑炭頭在最上）
+    drawCenser(w, h);   // 小香爐（含爐中堆積的灰）
+
+    if (s.lit) spawnSmoke(w / 2, emberY(h));
+    renderSmoke(ctx, w, h);
+    renderFallingAsh(w, h);
+    renderDebris();
+    renderSparks();
+  } catch (err) {
+    console.warn('render frame error:', err && err.message);
   }
-
-  if (s.lit && s.phase === 'burning') {
-    const elapsed = (performance.now() - s.startTime) / 1000;
-    const ratio = Math.min(1, elapsed / s.duration);
-    if (ratio !== s.burnedRatio) store.set({ burnedRatio: ratio });
-    if (ratio >= 1) store.set({ phase: 'done', lit: false });
-  }
-
-  drawIncense(w, h);  // 香身、香灰、火星、黑炭頭（黑炭頭在最上）
-  drawCenser(w, h);   // 小香爐（含爐中堆積的灰）
-
-  if (s.lit) spawnSmoke(w / 2, emberY(h));
-  renderSmoke(ctx, w, h);
-  renderFallingAsh(w, h);
-  renderDebris();
-  renderSparks();
 
   raf = requestAnimationFrame(loop);
 }
