@@ -1,18 +1,17 @@
-// 牌位模式：樣式、對象（祖先/寵物）、姓名/綽號、稱謂模板，設定存於 cookie
+// 牌位模式：樣式、對象（祖先/寵物）、姓名/綽號、稱謂模板，並可存多筆牌位，全存於 cookie
 import { store } from './store.js';
 
 const COOKIE = 'incense_tablet';
 const STYLES = ['lotus', 'spirit', 'plain'];
 
+function blankCurrent() {
+  return { style: 'lotus', kind: 'person', surname: '', given: '', template: 'wangsheng', petName: '', petTemplate: 'pet_wangsheng' };
+}
+
 const state = {
   on: false,
-  style: 'lotus',
-  kind: 'person',      // person | pet
-  surname: '',
-  given: '',
-  template: 'wangsheng',
-  petName: '',
-  petTemplate: 'pet_wangsheng',
+  current: blankCurrent(),
+  saved: [],
 };
 
 function saveCookie() {
@@ -21,25 +20,33 @@ function saveCookie() {
 function loadCookie() {
   const m = document.cookie.match(new RegExp('(?:^|; )' + COOKIE + '=([^;]*)'));
   if (!m) return;
-  try { Object.assign(state, JSON.parse(decodeURIComponent(m[1]))); } catch { /* ignore */ }
+  try {
+    const o = JSON.parse(decodeURIComponent(m[1]));
+    if (typeof o.on === 'boolean') state.on = o.on;
+    if (o.current) state.current = { ...blankCurrent(), ...o.current };
+    if (Array.isArray(o.saved)) state.saved = o.saved;
+    // 相容舊格式（單一牌位）
+    else if (o.style || o.surname || o.name) state.current = { ...blankCurrent(), ...o };
+  } catch { /* ignore */ }
+  if (!STYLES.includes(state.current.style)) state.current.style = 'lotus';
 }
 
-// → { cols: [由左到右的直書欄], suffix }
-function content() {
-  if (state.kind === 'pet') {
-    const nm = state.petName.trim() || '○○';
-    switch (state.petTemplate) {
+// 設定 → { cols: [由左到右的直書欄], suffix }
+function content(c) {
+  if (c.kind === 'pet') {
+    const nm = (c.petName || '').trim() || '○○';
+    switch (c.petTemplate) {
       case 'pet_wangsheng': return { cols: [nm], suffix: '往生蓮位' };
       case 'pet_aichong': return { cols: ['愛寵' + nm], suffix: '之蓮位' };
       case 'pet_lingwei': return { cols: [nm], suffix: '之靈位' };
       default: return { cols: [nm], suffix: '' };
     }
   }
-  const sur = state.surname.trim();
-  const giv = state.given.trim();
+  const sur = (c.surname || '').trim();
+  const giv = (c.given || '').trim();
   const full = (sur + giv) || '○○○';
   const surC = sur || '○';
-  switch (state.template) {
+  switch (c.template) {
     case 'wangsheng': return { cols: [`${surC}氏歷代`, full], suffix: '往生蓮位' };
     case 'lianwei': return { cols: [full], suffix: '之蓮位' };
     case 'lidai': return { cols: [`${surC}氏歷代祖先`], suffix: '之蓮位' };
@@ -48,15 +55,48 @@ function content() {
   }
 }
 
+function label(c) {
+  if (c.kind === 'pet') return (c.petName || '').trim() || '寵物';
+  return ((c.surname || '') + (c.given || '')).trim() || '未命名';
+}
+
 let els = {};
 
+function renderSavedList() {
+  els.saved.innerHTML = '';
+  if (!state.saved.length) {
+    const p = document.createElement('p');
+    p.className = 'saved-empty';
+    p.textContent = '尚無已存牌位';
+    els.saved.appendChild(p);
+    return;
+  }
+  for (const cfg of state.saved) {
+    const row = document.createElement('div');
+    row.className = 'saved-row';
+    const pick = document.createElement('button');
+    pick.type = 'button';
+    pick.className = 'saved-pick';
+    pick.textContent = label(cfg);
+    pick.addEventListener('click', () => { state.current = { ...blankCurrent(), ...cfg }; delete state.current.id; apply(); saveCookie(); });
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'saved-del';
+    del.setAttribute('aria-label', '刪除');
+    del.textContent = '刪除';
+    del.addEventListener('click', () => { state.saved = state.saved.filter((x) => x.id !== cfg.id); apply(); saveCookie(); });
+    row.append(pick, del);
+    els.saved.appendChild(row);
+  }
+}
+
 function apply() {
+  const c = state.current;
   document.body.classList.toggle('tablet-mode', state.on);
   store.set({ tabletMode: state.on });
 
-  els.tablet.className = 'tablet tablet--' + state.style;
-
-  const { cols, suffix } = content();
+  els.tablet.className = 'tablet tablet--' + c.style;
+  const { cols, suffix } = content(c);
   els.cols.innerHTML = '';
   for (const text of cols) {
     const d = document.createElement('div');
@@ -67,23 +107,23 @@ function apply() {
   els.suffix.textContent = suffix;
   els.suffix.hidden = !suffix;
 
-  // 同步 UI
+  // 同步編輯 UI
   els.toggle.checked = state.on;
   els.options.hidden = !state.on;
-  els.surname.value = state.surname;
-  els.given.value = state.given;
-  els.template.value = state.template;
-  els.petName.value = state.petName;
-  els.petTemplate.value = state.petTemplate;
-  els.personFields.hidden = state.kind !== 'person';
-  els.petFields.hidden = state.kind !== 'pet';
-  for (const b of els.styleBtns) b.classList.toggle('seg__btn--on', b.dataset.style === state.style);
-  for (const b of els.kindBtns) b.classList.toggle('seg__btn--on', b.dataset.kind === state.kind);
+  els.surname.value = c.surname;
+  els.given.value = c.given;
+  els.template.value = c.template;
+  els.petName.value = c.petName;
+  els.petTemplate.value = c.petTemplate;
+  els.personFields.hidden = c.kind !== 'person';
+  els.petFields.hidden = c.kind !== 'pet';
+  for (const b of els.styleBtns) b.classList.toggle('seg__btn--on', b.dataset.style === c.style);
+  for (const b of els.kindBtns) b.classList.toggle('seg__btn--on', b.dataset.kind === c.kind);
+  renderSavedList();
 }
 
 export function initTablet() {
   loadCookie();
-  if (!STYLES.includes(state.style)) state.style = 'lotus';
 
   els = {
     tablet: document.getElementById('tablet'),
@@ -100,17 +140,26 @@ export function initTablet() {
     petFields: document.getElementById('petFields'),
     styleBtns: Array.from(document.querySelectorAll('#tabletStyles .seg__btn')),
     kindBtns: Array.from(document.querySelectorAll('#tabletKinds .seg__btn')),
+    saved: document.getElementById('savedTablets'),
+    saveBtn: document.getElementById('saveTablet'),
   };
 
   const upd = () => { apply(); saveCookie(); };
+  const c = () => state.current;
   els.toggle.addEventListener('change', () => { state.on = els.toggle.checked; upd(); });
-  els.surname.addEventListener('input', () => { state.surname = els.surname.value; upd(); });
-  els.given.addEventListener('input', () => { state.given = els.given.value; upd(); });
-  els.template.addEventListener('change', () => { state.template = els.template.value; upd(); });
-  els.petName.addEventListener('input', () => { state.petName = els.petName.value; upd(); });
-  els.petTemplate.addEventListener('change', () => { state.petTemplate = els.petTemplate.value; upd(); });
-  for (const b of els.styleBtns) b.addEventListener('click', () => { state.style = b.dataset.style; upd(); });
-  for (const b of els.kindBtns) b.addEventListener('click', () => { state.kind = b.dataset.kind; upd(); });
+  els.surname.addEventListener('input', () => { c().surname = els.surname.value; upd(); });
+  els.given.addEventListener('input', () => { c().given = els.given.value; upd(); });
+  els.template.addEventListener('change', () => { c().template = els.template.value; upd(); });
+  els.petName.addEventListener('input', () => { c().petName = els.petName.value; upd(); });
+  els.petTemplate.addEventListener('change', () => { c().petTemplate = els.petTemplate.value; upd(); });
+  for (const b of els.styleBtns) b.addEventListener('click', () => { c().style = b.dataset.style; upd(); });
+  for (const b of els.kindBtns) b.addEventListener('click', () => { c().kind = b.dataset.kind; upd(); });
+
+  els.saveBtn.addEventListener('click', () => {
+    const id = 'tb' + Date.now() + Math.floor(Math.random() * 1000);
+    state.saved.push({ ...state.current, id });
+    upd();
+  });
 
   apply();
 }
