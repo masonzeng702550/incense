@@ -1,7 +1,7 @@
-// 環保電子香 — Service Worker（離線快取）
-// 注意：Vite build 後 JS/CSS 會帶 hash，採「執行時快取」策略涵蓋，
-// 預快取只放確定存在的入口與圖示。
-const CACHE = 'incense-v1';
+// 環保電子香 — Service Worker
+// 策略：HTML 走 network-first（永遠拿最新、引用到最新樣式/程式）；
+//       帶 hash 的 JS/CSS/圖示走 cache-first（檔名不同即更新）。
+const CACHE = 'incense-v3';
 const PRECACHE = [
   './',
   './index.html',
@@ -15,36 +15,54 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-    ).then(() => self.clients.claim()),
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
   );
 });
+
+function isHTML(request, url) {
+  return request.mode === 'navigate'
+    || request.destination === 'document'
+    || url.pathname.endsWith('/')
+    || url.pathname.endsWith('.html');
+}
 
 self.addEventListener('fetch', (e) => {
   const { request } = e;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
-  // 天氣 API：network-first，失敗退回快取
+  // HTML：network-first，離線才用快取 → 不會吃到舊樣式
+  if (url.origin === location.origin && isHTML(request, url)) {
+    e.respondWith(
+      fetch(request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(request, copy));
+          return res;
+        })
+        .catch(() => caches.match(request).then((r) => r || caches.match('./index.html'))),
+    );
+    return;
+  }
+
+  // 天氣 API：network-first
   if (url.hostname.includes('open-meteo')) {
     e.respondWith(fetch(request).catch(() => caches.match(request)));
     return;
   }
 
-  // 同源靜態資源：cache-first，並把新資源寫入快取（stale-while-revalidate 風格）
+  // 其餘同源資源（帶 hash 的 JS/CSS、圖示）：cache-first
   if (url.origin === location.origin) {
     e.respondWith(
-      caches.match(request).then((cached) => {
-        const fetched = fetch(request).then((res) => {
-          if (res && res.status === 200) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(request, copy));
-          }
-          return res;
-        }).catch(() => cached);
-        return cached || fetched;
-      }),
+      caches.match(request).then((cached) => cached || fetch(request).then((res) => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(request, copy));
+        }
+        return res;
+      })),
     );
   }
 });

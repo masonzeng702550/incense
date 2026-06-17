@@ -64,20 +64,19 @@ body.tablet-mode .tablet { display: flex; }
 .tablet__inner {
   border: 1.5px solid color-mix(in srgb, var(--tablet-edge) 60%, transparent);
   border-radius: 9px 9px 4px 4px;
-  padding: 20px 12px 24px;
-  min-height: 30vh;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 24px 12px 30px;
+  min-height: 46vh;                /* 牌位加長 */
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
-.tablet__cols { display: flex; justify-content: center; align-items: flex-start; gap: 4px; }
+.tablet__cols { display: flex; justify-content: center; align-items: flex-start; gap: 8px; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
   font-family: "Noto Serif TC", "Songti TC", serif;
   color: var(--tablet-ink); text-shadow: 0 1px 2px rgba(0,0,0,.65);
-  line-height: 1.4;
+  line-height: 1.4; letter-spacing: 1px;
+  font-size: clamp(22px, 5.6vw, 30px);   /* 兩欄同字級 */
 }
-.tablet__name { font-size: clamp(24px, 6.2vw, 32px); letter-spacing: 1px; }
-.tablet__lineage { font-size: clamp(15px, 3.8vw, 19px); opacity: .92; }
-.tablet__suffix { font-size: clamp(21px, 5.4vw, 28px); letter-spacing: 2px; margin-top: 2px; }
+.tablet__suffix { margin-top: auto; }    /* 往生蓮位推到下方 */
 /* 底座 */
 .tablet__base {
   width: 70%; height: 18px; margin-top: -2px;

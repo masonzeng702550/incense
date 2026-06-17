@@ -21,11 +21,8 @@
   <div id="tablet" class="tablet" aria-hidden="true">
     <div class="tablet__frame">
       <div class="tablet__inner">
-        <div class="tablet__cols">
-          <div class="tablet__col tablet__lineage" id="tabletLineage">○氏歷代</div>
-          <div class="tablet__col tablet__name" id="tabletName">○○○</div>
-        </div>
-        <div class="tablet__suffix" id="tabletSuffix">往生蓮位</div>
+        <div class="tablet__cols" id="tabletCols"></div>
+        <div class="tablet__suffix" id="tabletSuffix"></div>
       </div>
     </div>
     <div class="tablet__base"></div>
@@ -108,20 +105,51 @@
           <button type="button" class="seg__btn" data-style="plain">簡約</button>
         </div>
       </div>
-      <label class="field">
-        <span>祖先名字</span>
-        <input id="ancestorName" type="text" placeholder="例：王大明" maxlength="12" />
-      </label>
-      <label class="field">
-        <span>稱謂模板</span>
-        <select id="tabletTemplate">
-          <option value="wangsheng">｛名｝＋｛姓｝氏歷代＋往生蓮位</option>
-          <option value="lianwei">｛名｝＋之蓮位</option>
-          <option value="lidai">｛姓｝氏歷代祖先＋之蓮位</option>
-          <option value="lingwei">｛名｝＋之靈位</option>
-          <option value="raw">自訂（只顯示名字）</option>
-        </select>
-      </label>
+      <div class="field">
+        <span>對象</span>
+        <div class="seg" id="tabletKinds">
+          <button type="button" class="seg__btn" data-kind="person">祖先 / 家人</button>
+          <button type="button" class="seg__btn" data-kind="pet">寵物</button>
+        </div>
+      </div>
+
+      <div id="personFields">
+        <label class="field">
+          <span>姓</span>
+          <input id="surname" type="text" placeholder="例：王" maxlength="4" />
+        </label>
+        <label class="field">
+          <span>名</span>
+          <input id="givenName" type="text" placeholder="例：大明" maxlength="8" />
+        </label>
+        <label class="field">
+          <span>稱謂模板</span>
+          <select id="tabletTemplate">
+            <option value="wangsheng">名諱＋姓氏歷代＋往生蓮位</option>
+            <option value="lianwei">名諱＋之蓮位</option>
+            <option value="lidai">姓氏歷代祖先＋之蓮位</option>
+            <option value="lingwei">名諱＋之靈位</option>
+            <option value="raw">自訂（只顯示名諱）</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="petFields" hidden>
+        <label class="field">
+          <span>名字 / 綽號</span>
+          <input id="petName" type="text" placeholder="例：小白" maxlength="8" />
+        </label>
+        <label class="field">
+          <span>稱謂模板</span>
+          <select id="petTemplate">
+            <option value="pet_wangsheng">綽號＋往生蓮位</option>
+            <option value="pet_aichong">愛寵＋綽號＋之蓮位</option>
+            <option value="pet_lingwei">綽號＋之靈位</option>
+            <option value="pet_raw">自訂（只顯示綽號）</option>
+          </select>
+        </label>
+      </div>
+
       <p class="weather-info">牌位設定會記住（存於 cookie）。</p>
     </div>
 
