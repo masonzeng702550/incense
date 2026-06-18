@@ -90,9 +90,15 @@ startBtn.addEventListener('click', async () => {
 });
 
 // 設定面板：手動開關（開啟時才請求權限；關閉後永遠不問）
+const featCameraNote = document.getElementById('featCameraNote');
 featCamera.addEventListener('change', async () => {
-  if (featCamera.checked) { await enableCamera(); }
-  else { stopCamera(); setPref('camera', 'off'); }
+  if (featCamera.checked) {
+    const ok = await enableCamera();
+    featCameraNote.textContent = ok ? '鏡頭已開啟。' : '無法開啟鏡頭：可能被拒絕，請至瀏覽器網站設定允許鏡頭後再試。';
+  } else {
+    stopCamera(); setPref('camera', 'off');
+    featCameraNote.textContent = '鏡頭已關閉。';
+  }
 });
 featMotion.addEventListener('change', async () => {
   if (featMotion.checked) { await enableMotion(); }

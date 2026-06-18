@@ -57,7 +57,7 @@
 </head>
 <body class="phase-idle">
   <!-- AR 鏡頭背景（手機） / 靜態背景（桌機・降級） -->
-  <video id="camera" class="camera-only" playsinline muted></video>
+  <video id="camera" playsinline muted></video>
   <div id="altarBg" class="static-altar-bg" aria-hidden="true"></div>
 
   <!-- 牌位（牌位模式時顯示，置於香之後） -->
@@ -151,10 +151,11 @@
       <input id="ecoMode" type="checkbox" />
       <span>省電模式（降低動畫）</span>
     </label>
-    <label class="field field--row camera-only">
+    <label class="field field--row">
       <input id="featCamera" type="checkbox" />
-      <span>鏡頭 AR 背景</span>
+      <span>鏡頭 AR 背景（開啟時向瀏覽器要求鏡頭權限）</span>
     </label>
+    <p id="featCameraNote" class="weather-info"></p>
     <label class="field field--row camera-only">
       <input id="featMotion" type="checkbox" />
       <span>動態效果（陀螺儀煙霧 / 殘影）</span>
