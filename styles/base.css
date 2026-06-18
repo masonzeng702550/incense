@@ -139,6 +139,13 @@ body:not(.phase-idle) .gate { display: none; }
 .topbar__actions { display: flex; gap: .5rem; }
 .icon-btn.is-on { background: var(--temple-red); border-color: var(--gold); color: #fff; opacity: 1; }
 
+/* 自製 SVG 圖示 */
+.ico { width: 1.15em; height: 1.15em; fill: currentColor; flex: none; vertical-align: -0.18em; }
+.btn--ico, .icon-btn--ico { display: inline-flex; align-items: center; gap: .5em; }
+.ico--pause { display: none; }
+.is-on .ico--play { display: none; }
+.is-on .ico--pause { display: inline-block; }
+
 .controls {
   position: fixed; left: 0; right: 0;
   bottom: calc(var(--safe-bottom) + 1.25rem); z-index: 20;

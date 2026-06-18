@@ -126,10 +126,13 @@ sutraToggle.addEventListener('click', () => sutra.toggle());
 sutraMode.addEventListener('change', () => { sutra.setMode(sutraMode.value); sutraUrlField.hidden = sutraMode.value !== 'custom'; });
 sutraVol.addEventListener('input', () => { sutra.setVolume(Number(sutraVol.value) / 100); sutraVolLabel.textContent = sutraVol.value; });
 sutraUrl.addEventListener('input', () => sutra.setUrl(sutraUrl.value));
+const sutraBtnLabel = document.getElementById('sutraBtnLabel');
+const sutraToggleLabel = document.getElementById('sutraToggleLabel');
 sutra.onSutra((isPlaying) => {
   sutraBtn.classList.toggle('is-on', isPlaying);
-  sutraBtn.textContent = isPlaying ? '誦經中' : '誦經';
-  sutraToggle.textContent = isPlaying ? '⏸ 暫停誦經' : '▶ 播放誦經';
+  sutraToggle.classList.toggle('is-on', isPlaying);
+  sutraBtnLabel.textContent = isPlaying ? '誦經中' : '誦經';
+  sutraToggleLabel.textContent = isPlaying ? '暫停誦經' : '播放誦經';
 });
 
 // 燃畢時把點香鈕變成「重新上香」

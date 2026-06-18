@@ -97,7 +97,10 @@
   <header class="topbar">
     <span class="brand">電子香</span>
     <div class="topbar__actions">
-      <button id="sutraBtn" class="icon-btn" title="誦經播放" aria-label="誦經播放">誦經</button>
+      <button id="sutraBtn" class="icon-btn icon-btn--ico" title="誦經播放" aria-label="誦經播放">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a2 2 0 0 1 2 2v.6a6 6 0 0 1 4 5.6v3.6l1.8 2v1.1H4.2v-1.1L6 13.4V9.8a6 6 0 0 1 4-5.6V4a2 2 0 0 1 2-2zm0 19a2.5 2.5 0 0 1-2.45-2h4.9A2.5 2.5 0 0 1 12 21z"/></svg>
+        <span id="sutraBtnLabel">誦經</span>
+      </button>
       <button id="muteBtn" class="icon-btn" title="聲音開關" aria-label="聲音開關">聲音</button>
     </div>
   </header>
@@ -164,7 +167,11 @@
       <span>音量：<b id="sutraVolLabel">50</b>％</span>
       <input id="sutraVol" type="range" min="0" max="100" value="50" />
     </label>
-    <button id="sutraToggle" type="button" class="btn btn--ghost">▶ 播放 / 暫停 誦經</button>
+    <button id="sutraToggle" type="button" class="btn btn--ghost btn--ico">
+      <svg class="ico ico--play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+      <svg class="ico ico--pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      <span id="sutraToggleLabel">播放誦經</span>
+    </button>
 
     <hr class="divider" />
     <label class="field field--row">
@@ -229,7 +236,10 @@
       <div class="field">
         <span>牌位管理（可存多筆）</span>
         <div id="savedTablets" class="saved-list"></div>
-        <button type="button" id="saveTablet" class="btn btn--ghost">＋ 儲存目前為新牌位</button>
+        <button type="button" id="saveTablet" class="btn btn--ghost btn--ico">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+          <span>儲存目前為新牌位</span>
+        </button>
       </div>
       <p class="weather-info">牌位與清單會記住（存於 cookie）。</p>
     </div>
