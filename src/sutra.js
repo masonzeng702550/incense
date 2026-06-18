@@ -106,15 +106,30 @@ function stopSynth() {
   stopDrone();
 }
 
-function startCustom() {
-  if (!audioEl) { audioEl = new Audio(); audioEl.loop = true; }
-  if (!state.url) return false;
-  audioEl.src = state.url;
-  audioEl.volume = state.volume;
-  audioEl.play().catch(() => {});
-  return true;
+// 播放清單（單檔循環；多段則依序播放後循環）。載入失敗呼叫 onError。
+let playlist = [];
+let plIndex = 0;
+let onPlError = null;
+function startPlaylist(urls, onError) {
+  if (!urls || !urls.length) { if (onError) onError(); return; }
+  if (!audioEl) audioEl = new Audio();
+  playlist = urls; plIndex = 0; onPlError = onError;
+  audioEl.onended = () => {
+    plIndex = (plIndex + 1) % playlist.length;
+    playOne();
+  };
+  audioEl.onerror = () => { if (onPlError) onPlError(); };
+  playOne();
 }
-function stopCustom() { if (audioEl) audioEl.pause(); }
+function playOne() {
+  audioEl.loop = playlist.length === 1;       // 單檔無縫循環
+  audioEl.src = playlist[plIndex];
+  audioEl.volume = state.volume;
+  audioEl.play().catch(() => { if (onPlError) onPlError(); });
+}
+function stopPlaylist() {
+  if (audioEl) { audioEl.onended = null; audioEl.onerror = null; audioEl.pause(); }
+}
 
 // 佛經語音朗讀（TTS）
 function pickVoice() {
@@ -154,14 +169,20 @@ export function play() {
   if (playing) return;
   playing = true;
   notify();
-  if (state.mode === 'custom') startCustom();
-  else if (SUTRAS[state.mode]) startTTS(SUTRAS[state.mode].lines);
-  else startSynth();
+  if (state.mode === 'custom') {
+    startPlaylist(state.url ? [state.url] : null, null);
+  } else if (SUTRAS[state.mode]) {
+    const s = SUTRAS[state.mode];
+    // 優先播放念誦錄音；載入失敗（離線等）退回語音朗讀
+    startPlaylist(s.audio, () => { if (playing) startTTS(s.lines); });
+  } else {
+    startSynth();
+  }
 }
 export function pause() {
   if (!playing) return;
   playing = false;
-  stopSynth(); stopCustom(); stopTTS();
+  stopSynth(); stopPlaylist(); stopTTS();
   notify();
 }
 export function toggle() { playing ? pause() : play(); }

@@ -2,9 +2,15 @@
 // 完整專業唱誦版可由使用者於「自訂音檔網址」貼上錄音連結。
 const KAIJING = '無上甚深微妙法，百千萬劫難遭遇，我今見聞得受持，願解如來真實義。';
 
+// 念誦示範錄音（archive.org，HTTPS 直連、可外連）；離線或載入失敗時退回語音朗讀(lines)
+const AR = 'https://archive.org/download/';
+const ITEM1 = AR + '20230626_20230626_1225/';
+const ITEM2 = AR + '02.-_20230626/';
+
 export const SUTRAS = {
   amituo: {
     name: '佛說阿彌陀經',
+    audio: [ITEM1 + '%E4%BD%9B%E8%AA%AA%E9%98%BF%E5%BD%8C%E9%99%80%E7%B6%93%E2%80%94%E5%BF%B5%E8%AA%A6%E7%A4%BA%E7%AF%84.mp3'],
     lines: [
       '佛說阿彌陀經。',
       KAIJING,
@@ -17,6 +23,7 @@ export const SUTRAS = {
   },
   pumen: {
     name: '觀世音菩薩普門品',
+    audio: [ITEM1 + '%E5%A6%99%E6%B3%95%E8%93%AE%E8%8F%AF%E7%B6%93%E8%A7%80%E4%B8%96%E9%9F%B3%E8%8F%A9%E8%96%A9%E6%99%AE%E9%96%80%E5%93%81%E2%80%94%E5%BF%B5%E8%AA%A6%E7%A4%BA%E7%AF%84.mp3'],
     lines: [
       '觀世音菩薩普門品。',
       KAIJING,
@@ -29,6 +36,11 @@ export const SUTRAS = {
   },
   dizang: {
     name: '地藏菩薩本願經',
+    audio: [
+      ITEM2 + '02.%E5%9C%B0%E8%97%8F%E8%8F%A9%E8%96%A9%E6%9C%AC%E9%A1%98%E7%B6%93%EF%BC%88%E5%8D%B7%E4%B8%8A%EF%BC%89%EF%BC%8D%E5%BF%B5%E8%AA%A6%E7%A4%BA%E7%AF%84.mp3',
+      ITEM2 + '03.%E5%9C%B0%E8%97%8F%E8%8F%A9%E8%96%A9%E6%9C%AC%E9%A1%98%E7%B6%93%EF%BC%88%E5%8D%B7%E4%B8%AD%EF%BC%89%EF%BC%8D%E5%BF%B5%E8%AA%A6%E7%A4%BA%E7%AF%84.mp3',
+      ITEM2 + '04.%E5%9C%B0%E8%97%8F%E8%8F%A9%E8%96%A9%E6%9C%AC%E9%A1%98%E7%B6%93%EF%BC%88%E5%8D%B7%E4%B8%8B%EF%BC%89%EF%BC%8D%E5%BF%B5%E8%AA%A6%E7%A4%BA%E7%AF%84.mp3',
+    ],
     lines: [
       '地藏菩薩本願經。',
       KAIJING,
@@ -41,6 +53,7 @@ export const SUTRAS = {
   },
   yaoshi: {
     name: '藥師琉璃光如來本願功德經',
+    audio: [ITEM1 + '%E8%97%A5%E5%B8%AB%E7%90%89%E7%92%83%E5%85%89%E5%A6%82%E4%BE%86%E6%9C%AC%E9%A1%98%E5%8A%9F%E5%BE%B7%E7%B6%93%E2%80%94%E5%BF%B5%E8%AA%A6%E7%A4%BA%E7%AF%84.mp3'],
     lines: [
       '藥師琉璃光如來本願功德經。',
       KAIJING,
