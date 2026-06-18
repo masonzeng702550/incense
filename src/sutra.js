@@ -1,4 +1,6 @@
-// 誦經 / 梵音：WebAudio 合成木魚・鐘磬・梵音（免音檔、可離線），亦支援自訂 mp3 網址
+// 誦經 / 梵音：WebAudio 合成木魚・鐘磬・梵音 + 四部佛經語音朗讀（TTS），亦支援自訂 mp3 網址
+import { SUTRAS } from './sutra-texts.js';
+
 let ctx, master;
 let playing = false;
 let timer = null;
@@ -114,17 +116,52 @@ function startCustom() {
 }
 function stopCustom() { if (audioEl) audioEl.pause(); }
 
+// 佛經語音朗讀（TTS）
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const vs = speechSynthesis.getVoices();
+  return vs.find((v) => /^zh[-_]?TW/i.test(v.lang))
+    || vs.find((v) => /^zh[-_]?(HK|Hant)/i.test(v.lang))
+    || vs.find((v) => /^zh/i.test(v.lang)) || null;
+}
+function startTTS(lines) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  let i = 0;
+  const voice = pickVoice();
+  const next = () => {
+    if (!playing) return;
+    if (i >= lines.length) i = 0;             // 循環朗讀
+    const u = new SpeechSynthesisUtterance(lines[i]);
+    if (voice) u.voice = voice;
+    u.lang = (voice && voice.lang) || 'zh-TW';
+    u.rate = 0.82; u.pitch = 1; u.volume = state.volume;
+    u.onend = () => { i++; if (playing) next(); };
+    u.onerror = () => { i++; if (playing) setTimeout(next, 300); };
+    speechSynthesis.speak(u);
+  };
+  // 語音清單可能尚未載入
+  if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = () => { if (playing) next(); };
+    setTimeout(() => { if (playing) next(); }, 300);
+  } else {
+    next();
+  }
+}
+function stopTTS() { if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+
 export function play() {
   if (playing) return;
   playing = true;
-  if (state.mode === 'custom') startCustom();
-  else startSynth();
   notify();
+  if (state.mode === 'custom') startCustom();
+  else if (SUTRAS[state.mode]) startTTS(SUTRAS[state.mode].lines);
+  else startSynth();
 }
 export function pause() {
   if (!playing) return;
   playing = false;
-  stopSynth(); stopCustom();
+  stopSynth(); stopCustom(); stopTTS();
   notify();
 }
 export function toggle() { playing ? pause() : play(); }
