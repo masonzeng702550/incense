@@ -9,6 +9,7 @@ import { initTimer } from './timer.js';
 import { initJiaobei } from './jiaobei.js';
 import { initTablet } from './tablet.js';
 import * as sutra from './sutra.js';
+import { initReminder } from './reminder.js';
 import { getNfcAction, scanNfc } from './nfc.js';
 import { registerPwa } from './pwa.js';
 
@@ -21,6 +22,7 @@ initStage();
 initTimer();
 initJiaobei();
 initTablet();
+initReminder();
 registerPwa();
 
 const startBtn = document.getElementById('startBtn');

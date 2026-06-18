@@ -234,6 +234,17 @@
       <p class="weather-info">牌位與清單會記住（存於 cookie）。</p>
     </div>
 
+    <hr class="divider" />
+    <label class="field field--row">
+      <input id="reminderOn" type="checkbox" />
+      <span>早晚拜拜提醒（推播通知）</span>
+    </label>
+    <div id="reminderFields" hidden>
+      <label class="field"><span>早課時間</span><input id="reminderMorning" type="time" value="06:00" /></label>
+      <label class="field"><span>晚課時間</span><input id="reminderEvening" type="time" value="18:00" /></label>
+      <p class="weather-info" id="reminderNote"></p>
+    </div>
+
     <button id="closeSettings" class="btn btn--ghost">關閉</button>
   </aside>
 
