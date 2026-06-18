@@ -98,12 +98,15 @@ function apply() {
   els.tablet.className = 'tablet tablet--' + c.style;
   const { cols, suffix } = content(c);
   els.cols.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'tablet__cols-row';
   for (const text of cols) {
     const d = document.createElement('div');
     d.className = 'tablet__col';
     d.textContent = text;
-    els.cols.appendChild(d);
+    row.appendChild(d);
   }
+  els.cols.appendChild(row);
   els.suffix.textContent = suffix;
   els.suffix.hidden = !suffix;
 
