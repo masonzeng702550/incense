@@ -118,10 +118,17 @@
     <button id="settingsBtn" class="btn btn--ghost">設定</button>
   </nav>
 
-  <!-- 擲筊結果 -->
+  <!-- 擲筊 -->
   <div id="jiaobeiResult" class="jiaobei-result" hidden>
-    <div class="jiaobei-cups"><span id="cupA" class="cup"></span><span id="cupB" class="cup"></span></div>
-    <p id="jiaobeiText" class="jiaobei-text"></p>
+    <div class="jiaobei-stage">
+      <div class="jiaobei-cups"><span id="cupA" class="cup"></span><span id="cupB" class="cup"></span></div>
+      <p id="jiaobeiText" class="jiaobei-text">擲筊請示</p>
+    </div>
+    <div class="jiaobei-actions">
+      <button id="throwBtn" type="button" class="btn btn--primary">擲 筊</button>
+      <button id="jiaobeiClose" type="button" class="btn btn--ghost">關 閉</button>
+    </div>
+    <p class="jiaobei-hint">或向上甩動投擲</p>
   </div>
 
   <!-- 設定面板 -->
