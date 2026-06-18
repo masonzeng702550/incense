@@ -192,23 +192,33 @@ body:not(.phase-idle) .gate { display: none; }
 }
 .jiaobei-stage { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
 .jiaobei-cups { display: flex; gap: 2.5rem; justify-content: center; align-items: flex-end; }
-.cup { width: 130px; height: 88px; display: inline-block; }
+.cup { width: 140px; height: 104px; display: inline-block; perspective: 600px; }
 .cup-svg { width: 100%; height: 100%; overflow: visible; }
-.cup.rolling { animation: roll .7s ease; }
-@keyframes roll {
-  0% { transform: translateY(0) rotateX(0) rotate(0); }
-  45% { transform: translateY(-90px) rotateX(360deg) rotate(160deg); }
-  100% { transform: translateY(0) rotateX(720deg) rotate(360deg); }
+/* 由遠丟近、落地撞擊回彈 */
+.cup.throwing .cup-svg { animation: cupThrow .82s cubic-bezier(.3,.7,.4,1) forwards; transform-origin: 50% 60%; }
+@keyframes cupThrow {
+  0%   { transform: translateY(-210px) scale(.4)  rotateX(0deg)    rotate(0); opacity: .3; }
+  18%  { opacity: 1; }
+  68%  { transform: translateY(10px)   scale(1.15) rotateX(880deg) rotate(150deg); }  /* 撞擊壓低、放大 */
+  82%  { transform: translateY(-7px)   scale(.97)  rotateX(980deg) rotate(300deg); }  /* 回彈 */
+  100% { transform: translateY(0)      scale(1)    rotateX(1080deg) rotate(360deg); }
 }
-/* 月牙筊：紅漆 + 金邊；陰面有隆起高光、陽面平面 */
-.cup-shadow { fill: #000; opacity: .3; }
-.cup-body { fill: #9c1f1f; stroke: #d4af37; stroke-width: 1.5; stroke-opacity: .6; }
-.cup--convex .cup-body { fill: #861818; }
-.cup--roll .cup-body { fill: #93202a; }
-.cup-hi { opacity: 0; }
-.cup--convex .cup-hi { fill: #d24a44; opacity: .9; }   /* 凸面隆起反光 */
-.cup--flat .cup-hi { fill: #ffffff; opacity: .1; }      /* 平面薄光澤 */
-.cup-label { fill: var(--gold); font-size: 15px; letter-spacing: 2px; text-anchor: middle; font-family: serif; }
+.jiaobei-cups.impact { animation: jbShake .26s ease; }
+@keyframes jbShake {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-7px,2px); }
+  45% { transform: translate(6px,0); }
+  70% { transform: translate(-3px,1px); }
+}
+/* 月牙筊：立體紅漆 + 厚度側面 + 金邊；陰面光澤(圓滑)、陽面平面 */
+.cup-shadow { fill: #000; opacity: .32; }
+.cup-edge { fill: #4e0e0e; }                            /* 厚度側面，立體感 */
+.cup-body { stroke: #d8b24e; stroke-width: 1.6; stroke-opacity: .7; }
+.cup--flat .cup-body { stroke-opacity: .9; }            /* 平面金邊更明顯 */
+.cup-spec { fill: #fff; opacity: .5; }                  /* 凸面光澤(光色) */
+.cup-spec2 { fill: #fff; opacity: .8; }                 /* 凸面亮點 */
+.cup-flatsheen { fill: #fff; opacity: .07; }            /* 平面薄光 */
+.cup-label { fill: var(--gold); font-size: 16px; letter-spacing: 2px; text-anchor: middle; font-family: serif; }
 .jiaobei-text { font-size: 1.7rem; color: var(--gold); font-weight: 700; letter-spacing: .15em; padding: 0 1rem; text-align: center; min-height: 2rem; }
 .jiaobei-actions { display: flex; gap: 1rem; }
 .jiaobei-hint { color: var(--text); opacity: .6; font-size: 1rem; }

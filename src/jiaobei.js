@@ -14,15 +14,31 @@ function decide(a, b) {
   return a ? 'xiao' : 'yin';     // 兩陽=笑筊；兩陰=陰筊
 }
 
-// 月牙形筊杯。state: 'flat'(陽) | 'convex'(陰) | 'roll'(翻滾中)
-function cupSvg(s) {
+// 月牙形筊杯。s: 'flat'(陽,平面) | 'convex'(陰,凸面有光澤) | 'roll'(翻滾中)。id 讓漸層唯一
+const TOP = 'M22 44 Q70 84 118 44 Q70 60 22 44 Z';
+function cupSvg(s, id) {
   const cls = s === 'flat' ? 'cup--flat' : s === 'convex' ? 'cup--convex' : 'cup--roll';
   const label = s === 'flat' ? '陽' : s === 'convex' ? '陰' : '';
-  return `<svg class="cup-svg ${cls}" viewBox="0 0 130 88" aria-hidden="true">
-    <ellipse class="cup-shadow" cx="65" cy="72" rx="42" ry="6"/>
-    <path class="cup-body" d="M20 38 Q65 74 110 38 Q65 53 20 38 Z"/>
-    <path class="cup-hi" d="M33 40 Q65 61 97 40 Q65 47 33 40 Z"/>
-    <text class="cup-label" x="65" y="86">${label}</text>
+  const fill = s === 'flat' ? `url(#flat${id})` : s === 'convex' ? `url(#dome${id})` : `url(#dome${id})`;
+  const spec = s === 'convex'
+    ? '<ellipse class="cup-spec" cx="70" cy="51" rx="30" ry="6"/><ellipse class="cup-spec2" cx="57" cy="50" rx="9" ry="3"/>'
+    : s === 'flat'
+      ? '<path class="cup-flatsheen" d="M34 46 Q70 66 106 46 Q70 53 34 46 Z"/>'
+      : '<ellipse class="cup-spec" cx="70" cy="51" rx="26" ry="5"/>';
+  return `<svg class="cup-svg ${cls}" viewBox="0 0 140 104" aria-hidden="true">
+    <defs>
+      <radialGradient id="dome${id}" cx="50%" cy="34%" r="70%">
+        <stop offset="0" stop-color="#f0958a"/><stop offset="42%" stop-color="#bd3b35"/><stop offset="100%" stop-color="#6c1111"/>
+      </radialGradient>
+      <linearGradient id="flat${id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9c2626"/><stop offset="100%" stop-color="#711515"/>
+      </linearGradient>
+    </defs>
+    <ellipse class="cup-shadow" cx="70" cy="90" rx="46" ry="7"/>
+    <path class="cup-edge" d="${TOP}" transform="translate(0,7)"/>
+    <path class="cup-body" d="${TOP}" fill="${fill}"/>
+    ${spec}
+    <text class="cup-label" x="70" y="102">${label}</text>
   </svg>`;
 }
 
@@ -38,9 +54,11 @@ export function initJiaobei() {
   const throwBtn = document.getElementById('throwBtn');
   const closeBtn = document.getElementById('jiaobeiClose');
 
+  const cups = panel.querySelector('.jiaobei-cups');
+
   function rest() {
     cupA.className = 'cup'; cupB.className = 'cup';
-    cupA.innerHTML = cupSvg('flat'); cupB.innerHTML = cupSvg('convex');
+    cupA.innerHTML = cupSvg('flat', 'a'); cupB.innerHTML = cupSvg('convex', 'b');
     text.textContent = '擲筊請示';
   }
 
@@ -53,24 +71,31 @@ export function initJiaobei() {
     if (throwing) return;
     throwing = true;
     text.textContent = '擲筊中…';
-    cupA.className = 'cup rolling'; cupB.className = 'cup rolling';
-    cupA.innerHTML = cupSvg('roll'); cupB.innerHTML = cupSvg('roll');
+    cupA.className = 'cup throwing'; cupB.className = 'cup throwing';
+    cupA.innerHTML = cupSvg('roll', 'a'); cupB.innerHTML = cupSvg('roll', 'b');
     sound.jiaobei();
+
+    // 落地撞擊：晃動 + 震動
+    setTimeout(() => {
+      cups.classList.add('impact');
+      if (navigator.vibrate) { try { navigator.vibrate(35); } catch { /* */ } }
+      setTimeout(() => cups.classList.remove('impact'), 280);
+    }, 560);
 
     setTimeout(() => {
       const a = Math.random() < 0.5;
       const b = Math.random() < 0.5;
       const key = decide(a, b);
       cupA.className = 'cup'; cupB.className = 'cup';
-      cupA.innerHTML = cupSvg(a ? 'flat' : 'convex');
-      cupB.innerHTML = cupSvg(b ? 'flat' : 'convex');
+      cupA.innerHTML = cupSvg(a ? 'flat' : 'convex', 'a');
+      cupB.innerHTML = cupSvg(b ? 'flat' : 'convex', 'b');
       const prev = store.get().jiaobei.shengCount;
       const next = key === 'sheng' ? prev + 1 : 0;
       store.set({ jiaobei: { last: key, shengCount: next } });
       text.textContent = `${RESULTS[key].name}　${RESULTS[key].desc}`
         + (next >= 3 ? '（連續三聖筊）' : next > 0 ? `（聖筊 ${next}/3）` : '');
       throwing = false;
-    }, 750);
+    }, 820);
   }
 
   openBtn.addEventListener('click', open);
