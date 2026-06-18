@@ -59,13 +59,25 @@
 
   <!-- 牌位（牌位模式時顯示，置於香之後） -->
   <div id="tablet" class="tablet" aria-hidden="true">
+    <svg class="tablet__finial" viewBox="0 0 140 44" aria-hidden="true">
+      <path d="M70 4 C58 4 53 15 60 23 C47 14 28 19 29 31 C30 41 47 43 57 36 C61 41 66 43 70 43 C74 43 79 41 83 36 C93 43 110 41 111 31 C112 19 93 14 80 23 C87 15 82 4 70 4 Z" />
+      <circle cx="70" cy="9" r="3.4" />
+    </svg>
     <div class="tablet__frame">
       <div class="tablet__inner">
         <div class="tablet__cols" id="tabletCols"></div>
         <div class="tablet__suffix" id="tabletSuffix"></div>
       </div>
     </div>
-    <div class="tablet__base"></div>
+    <svg class="tablet__stand" viewBox="0 0 200 72" aria-hidden="true">
+      <path class="stand-body" d="M44 48 H156 L178 72 H22 Z" />
+      <rect class="stand-edge" x="40" y="45" width="120" height="4" rx="2" />
+      <path class="lotus-petal" d="M40 50 C22 40 28 22 40 18 C52 22 58 40 40 50 Z" />
+      <path class="lotus-petal" d="M70 50 C52 40 58 22 70 18 C82 22 88 40 70 50 Z" />
+      <path class="lotus-petal" d="M100 50 C82 40 88 22 100 18 C112 22 118 40 100 50 Z" />
+      <path class="lotus-petal" d="M130 50 C112 40 118 22 130 18 C142 22 148 40 130 50 Z" />
+      <path class="lotus-petal" d="M160 50 C142 40 148 22 160 18 C172 22 178 40 160 50 Z" />
+    </svg>
   </div>
 
   <!-- 香 + 煙 渲染畫布 -->

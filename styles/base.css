@@ -53,21 +53,36 @@ body.camera-active #altarBg { display: none; }
 body.tablet-mode .tablet { display: flex; }
 
 /* 外框（粗金邊） + 內框線 */
+/* 頂飾：如意雲頭 */
+.tablet__finial { display: block; width: 46%; margin: 0 auto -6px; position: relative; z-index: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); }
+.tablet__finial path, .tablet__finial circle { fill: var(--tablet-edge); stroke: rgba(0,0,0,.3); stroke-width: 1; }
+
 .tablet__frame {
   width: 100%;
-  background: var(--tablet-bg);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,230,170,.08), transparent 60%),
+    var(--tablet-bg);
   border: 3px solid var(--tablet-edge);
   border-radius: 14px 14px 6px 6px;
   padding: 7px;
   box-shadow: 0 12px 30px rgba(0,0,0,.55), inset 0 0 22px rgba(0,0,0,.5);
 }
 .tablet__inner {
+  position: relative;
   border: 1.5px solid color-mix(in srgb, var(--tablet-edge) 60%, transparent);
   border-radius: 9px 9px 4px 4px;
-  padding: 24px 12px 30px;
+  padding: 26px 14px 32px;
   min-height: 46vh;                /* 牌位加長 */
   display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
+/* 四角回紋角飾 */
+.tablet__inner::before, .tablet__inner::after {
+  content: ''; position: absolute; width: 20px; height: 20px;
+  border: 2px solid var(--tablet-edge); opacity: .65;
+}
+.tablet__inner::before { top: 7px; left: 7px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+.tablet__inner::after { bottom: 7px; right: 7px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+
 .tablet__cols { display: flex; justify-content: center; align-items: flex-start; gap: 8px; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
@@ -77,13 +92,12 @@ body.tablet-mode .tablet { display: flex; }
   font-size: clamp(28px, 7.2vw, 42px);   /* 兩欄同字級，放大 */
 }
 .tablet__suffix { margin-top: auto; }    /* 往生蓮位推到下方 */
-/* 底座 */
-.tablet__base {
-  width: 70%; height: 18px; margin-top: -2px;
-  background: linear-gradient(#3a120e, #1c0706);
-  border: 3px solid var(--tablet-edge); border-top: none;
-  border-radius: 0 0 10px 10px;
-}
+
+/* 蓮花底座 */
+.tablet__stand { display: block; width: 90%; margin: -6px auto 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
+.tablet__stand .stand-body { fill: #2a130e; }
+.tablet__stand .stand-edge { fill: var(--tablet-edge); opacity: .85; }
+.tablet__stand .lotus-petal { fill: var(--tablet-edge); stroke: rgba(0,0,0,.3); stroke-width: 1; }
 
 /* 蓮位：圓拱頂、暖紅金 */
 .tablet--lotus .tablet__frame { border-radius: 70px 70px 6px 6px; }
