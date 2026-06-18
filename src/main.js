@@ -106,6 +106,27 @@ muteBtn.addEventListener('click', () => {
 settingsBtn.addEventListener('click', () => { settingsPanel.hidden = false; });
 closeSettings.addEventListener('click', () => { settingsPanel.hidden = true; });
 
+// 側滑開關設定：自右緣往左滑開啟；在設定上往右滑關閉
+let swStart = null;
+window.addEventListener('touchstart', (e) => {
+  const t = e.touches[0];
+  swStart = { x: t.clientX, y: t.clientY };
+}, { passive: true });
+window.addEventListener('touchend', (e) => {
+  if (!swStart) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - swStart.x;
+  const dy = t.clientY - swStart.y;
+  const startX = swStart.x;
+  swStart = null;
+  if (document.body.classList.contains('phase-idle')) return;       // 尚未開始參拜
+  if (!document.getElementById('jiaobeiResult').hidden) return;     // 擲筊頁面不攔截
+  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return; // 需明顯水平滑動
+  const open = !settingsPanel.hidden;
+  if (!open && dx < 0 && startX > window.innerWidth * 0.7) settingsPanel.hidden = false; // 右緣左滑→開
+  else if (open && dx > 0) settingsPanel.hidden = true;             // 右滑→關
+}, { passive: true });
+
 // 誦經 / 梵音
 const sutraBtn = document.getElementById('sutraBtn');
 const sutraToggle = document.getElementById('sutraToggle');
