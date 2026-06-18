@@ -20,9 +20,21 @@ function ensure() {
   if (ctx) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
   master = ctx.createGain();
-  master.gain.value = state.volume;
+  master.gain.value = Math.max(0.0001, state.volume);
   master.connect(ctx.destination);
 }
+
+// 在使用者手勢中解鎖音訊（iOS / 自動播放政策）
+export async function unlock() {
+  ensure();
+  if (ctx.state !== 'running') { try { await ctx.resume(); } catch { /* */ } }
+  try {
+    const b = ctx.createBuffer(1, 1, 22050);
+    const s = ctx.createBufferSource();
+    s.buffer = b; s.connect(ctx.destination); s.start(0);
+  } catch { /* */ }
+}
+
 
 // 木魚「篤」
 function muyu(t) {
@@ -81,9 +93,9 @@ function schedule() {
   else if (state.mode === 'fanyin') { bell(now); timer = setTimeout(schedule, 12000); }
 }
 
-function startSynth() {
-  ensure();
-  ctx.resume();
+async function startSynth() {
+  await unlock();
+  if (!playing) return;
   if (state.mode === 'fanyin') startDrone();
   schedule();
 }

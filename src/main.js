@@ -59,6 +59,7 @@ async function enableMotion() {
 // 「開始參拜」：只在第一次（unset）或已選開啟（on）時請求；選擇被記住，不再每次詢問
 startBtn.addEventListener('click', async () => {
   sound.unlock();
+  sutra.unlock();
   store.set({ phase: 'ready' });
   document.body.classList.remove('phase-idle');
 
