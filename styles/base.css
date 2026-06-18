@@ -188,7 +188,8 @@ body:not(.phase-idle) .gate { display: none; }
 .jiaobei-result {
   position: fixed; inset: 0; z-index: 30;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;
-  background: rgba(0,0,0,.55); text-align: center; touch-action: none;
+  background: rgba(0,0,0,.88); backdrop-filter: blur(4px);
+  text-align: center; touch-action: none;
 }
 .jiaobei-stage { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
 .jiaobei-cups { display: flex; gap: 2.5rem; justify-content: center; align-items: flex-end; }
