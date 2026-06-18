@@ -116,7 +116,28 @@ export function initJiaobei() {
     }
   }
 
-  openBtn.addEventListener('click', open);
+  // 搖晃手機投擲
+  let motionOn = false;
+  let shakeCd = 0;
+  function onMotion(e) {
+    if (panel.hidden || throwing) return;
+    const a = e.acceleration && (e.acceleration.x !== null) ? e.acceleration : null;
+    const g = e.accelerationIncludingGravity;
+    const mag = a ? Math.hypot(a.x || 0, a.y || 0, a.z || 0)
+      : g ? Math.abs(Math.hypot(g.x || 0, g.y || 0, g.z || 0) - 9.8) : 0;
+    const now = performance.now();
+    if (mag > 16 && now > shakeCd) { shakeCd = now + 1400; doThrow(); }
+  }
+  async function ensureMotion() {
+    if (motionOn || typeof DeviceMotionEvent === 'undefined') return;
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      try { if ((await DeviceMotionEvent.requestPermission()) !== 'granted') return; } catch { return; }
+    }
+    motionOn = true;
+    window.addEventListener('devicemotion', onMotion);
+  }
+
+  openBtn.addEventListener('click', () => { open(); ensureMotion(); });
   throwBtn.addEventListener('click', doThrow);
   closeBtn.addEventListener('click', () => { panel.hidden = true; });
 

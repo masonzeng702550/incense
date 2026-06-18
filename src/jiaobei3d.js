@@ -28,21 +28,26 @@ export async function ensure3d(canvas) {
       const s = 1.7 / geom.boundingBox.max.y; // 長軸約 1.7 單位
       geom.scale(s, s, s);
 
+      const cw = canvas.clientWidth || 360, ch = canvas.clientHeight || 300;
       renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(canvas.clientWidth || 320, canvas.clientHeight || 190, false);
+      renderer.setSize(cw, ch, false);
 
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(40, (canvas.clientWidth || 320) / (canvas.clientHeight || 190), 0.1, 100);
-      camera.position.set(0, 3.4, 5.2);
-      camera.lookAt(0, -0.2, 0);
+      camera = new THREE.PerspectiveCamera(42, cw / ch, 0.1, 100);
+      camera.position.set(0, 2.2, 6.6);
+      camera.lookAt(0, 0.35, 0);   // 視框留出頭頂空間，拋起不被切
 
-      // 柔和打光、霧面材質 → 反光不明顯
-      scene.add(new THREE.AmbientLight(0xffffff, 1.15));
-      const key = new THREE.DirectionalLight(0xfff1e0, 0.85); key.position.set(2, 5, 3); scene.add(key);
-      const fill = new THREE.DirectionalLight(0x88aaff, 0.25); fill.position.set(-3, 1, -2); scene.add(fill);
+      // 光源自上方照下 → 紅漆 clearcoat 產生真實高光反射
+      scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+      const top = new THREE.DirectionalLight(0xffffff, 1.2); top.position.set(0.4, 8, 2.5); scene.add(top);
+      const fill = new THREE.DirectionalLight(0x9fb6ff, 0.18); fill.position.set(-3, 1, -2); scene.add(fill);
 
-      const mat = new THREE.MeshStandardMaterial({ color: 0x9c1f1f, roughness: 0.82, metalness: 0.04 });
+      // 紅漆材質：適度光澤 + clearcoat，靠上方光源反射（非貼圖假光）
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: 0x951d1d, roughness: 0.5, metalness: 0.0,
+        clearcoat: 0.7, clearcoatRoughness: 0.22,
+      });
 
       for (let i = 0; i < 2; i++) {
         const mesh = new THREE.Mesh(geom, mat);
@@ -116,9 +121,9 @@ export function throwAnim(aFlat, bFlat, onDone) {
   const tick = (now) => {
     const t = Math.min(1, (now - start) / DUR);
     const e = easeOut(t);
-    // 拋物線高度 + 落地回彈
-    let h = Math.sin(Math.min(t, 0.78) / 0.78 * Math.PI) * 1.9;
-    if (t > 0.78) { const b = (t - 0.78) / 0.22; h = Math.sin(b * Math.PI) * 0.22; } // 小回彈
+    // 拋物線高度 + 落地回彈（控制在視框內）
+    let h = Math.sin(Math.min(t, 0.78) / 0.78 * Math.PI) * 1.3;
+    if (t > 0.78) { const b = (t - 0.78) / 0.22; h = Math.sin(b * Math.PI) * 0.18; } // 小回彈
     for (let i = 0; i < 2; i++) {
       const s = init[i]; const g = blocks[i].group;
       g.rotation.x = s.sx + (s.tx - s.sx) * e;

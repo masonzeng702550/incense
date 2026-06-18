@@ -193,7 +193,7 @@ body:not(.phase-idle) .gate { display: none; }
 }
 .jiaobei-stage { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
 .jiaobei-stage.impact { animation: jbShake .26s ease; }
-.jiaobei-canvas { width: min(86vw, 420px); height: 210px; display: block; }
+.jiaobei-canvas { width: min(88vw, 440px); height: 300px; display: block; }
 .jiaobei-cups { display: flex; gap: 2.5rem; justify-content: center; align-items: flex-end; }
 .cup { width: 140px; height: 104px; display: inline-block; perspective: 600px; }
 .cup-svg { width: 100%; height: 100%; overflow: visible; }
