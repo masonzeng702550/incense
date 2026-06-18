@@ -12,6 +12,7 @@ let audioEl = null;
 const state = {
   mode: localStorage.getItem('sutra_mode') || 'muyu',
   url: localStorage.getItem('sutra_url') || '',
+  music: localStorage.getItem('sutra_music') !== '0', // 念經時是否疊佛樂背景
 };
 
 const listeners = new Set();
@@ -112,6 +113,46 @@ function stopDrone() {
   setTimeout(() => { osc.forEach((o) => { try { o.stop(); } catch { /* */ } }); if (g) g.disconnect(); }, 800);
 }
 
+// 佛樂背景（疊在念誦下）：低沉梵音 drone + 緩慢引磬
+let bedActive = false;
+let bedNodes = [];
+let bedTimer = null;
+let bedGain = null;
+function bedBell(t) {
+  for (const [m, a] of [[1, 0.5], [2.7, 0.24], [5.2, 0.1]]) {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = 880 * m;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(a, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 4.2);
+    o.connect(g).connect(bedGain); o.start(t); o.stop(t + 4.3);
+  }
+}
+function startMusicBed() {
+  if (bedActive) return;
+  ensure();
+  bedActive = true;
+  bedGain = ctx.createGain(); bedGain.gain.value = 0.45; bedGain.connect(master);
+  const dg = ctx.createGain(); dg.gain.value = 0;
+  dg.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 2.5);
+  dg.connect(bedGain);
+  for (const f of [98, 98.4, 147]) {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+    o.connect(dg); o.start(); bedNodes.push(o);
+  }
+  bedNodes.push(dg);
+  const tick = () => { if (!bedActive) return; bedBell(ctx.currentTime + 0.02); bedTimer = setTimeout(tick, 6500); };
+  bedTimer = setTimeout(tick, 1500);
+}
+function stopMusicBed() {
+  if (!bedActive) return;
+  bedActive = false;
+  clearTimeout(bedTimer); bedTimer = null;
+  const nodes = bedNodes; bedNodes = []; const bg = bedGain; bedGain = null;
+  if (bg && ctx) bg.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
+  setTimeout(() => { nodes.forEach((n) => { try { n.stop ? n.stop() : n.disconnect(); } catch { /* */ } }); if (bg) bg.disconnect(); }, 800);
+}
+
 function schedule() {
   if (!playing) return;
   const now = ctx.currentTime + 0.02;
@@ -189,7 +230,7 @@ function startTTS(lines) {
 }
 function stopTTS() { if ('speechSynthesis' in window) speechSynthesis.cancel(); }
 
-export function play() {
+export async function play() {
   if (playing) return;
   playing = true;
   notify();
@@ -199,6 +240,7 @@ export function play() {
     const s = SUTRAS[state.mode];
     // 優先播放念誦錄音；載入失敗（離線等）退回語音朗讀
     startPlaylist(s.audio, () => { if (playing) startTTS(s.lines); });
+    if (state.music) { await unlock(); if (playing) startMusicBed(); }  // 疊佛樂背景
   } else {
     startSynth();
   }
@@ -206,8 +248,16 @@ export function play() {
 export function pause() {
   if (!playing) return;
   playing = false;
-  stopSynth(); stopPlaylist(); stopTTS();
+  stopSynth(); stopPlaylist(); stopTTS(); stopMusicBed();
   notify();
+}
+export function setMusic(on) {
+  state.music = on;
+  localStorage.setItem('sutra_music', on ? '1' : '0');
+  if (playing && SUTRAS[state.mode]) {
+    if (on) unlock().then(() => { if (playing) startMusicBed(); });
+    else stopMusicBed();
+  }
 }
 export function toggle() { playing ? pause() : play(); }
 

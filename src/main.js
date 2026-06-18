@@ -112,16 +112,19 @@ const sutraToggle = document.getElementById('sutraToggle');
 const sutraMode = document.getElementById('sutraMode');
 const sutraUrl = document.getElementById('sutraUrl');
 const sutraUrlField = document.getElementById('sutraUrlField');
+const sutraMusic = document.getElementById('sutraMusic');
 {
   const s = sutra.getState();
   sutraMode.value = s.mode;
   sutraUrl.value = s.url;
   sutraUrlField.hidden = s.mode !== 'custom';
+  sutraMusic.checked = s.music;
 }
 sutraBtn.addEventListener('click', () => sutra.toggle());
 sutraToggle.addEventListener('click', () => sutra.toggle());
 sutraMode.addEventListener('change', () => { sutra.setMode(sutraMode.value); sutraUrlField.hidden = sutraMode.value !== 'custom'; });
 sutraUrl.addEventListener('input', () => sutra.setUrl(sutraUrl.value));
+sutraMusic.addEventListener('change', () => sutra.setMusic(sutraMusic.checked));
 const sutraBtnLabel = document.getElementById('sutraBtnLabel');
 const sutraToggleLabel = document.getElementById('sutraToggleLabel');
 sutra.onSutra((isPlaying) => {
