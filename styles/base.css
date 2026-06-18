@@ -136,6 +136,8 @@ body:not(.phase-idle) .gate { display: none; }
   padding: .75rem 1rem;
 }
 .brand { font-weight: 700; font-size: 1.25rem; color: var(--gold); letter-spacing: .35em; padding-left: .35em; }
+.topbar__actions { display: flex; gap: .5rem; }
+.icon-btn.is-on { background: var(--temple-red); border-color: var(--gold); color: #fff; opacity: 1; }
 
 .controls {
   position: fixed; left: 0; right: 0;

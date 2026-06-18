@@ -96,7 +96,10 @@
   <!-- 主要操作列 -->
   <header class="topbar">
     <span class="brand">電子香</span>
-    <button id="muteBtn" class="icon-btn" title="聲音開關" aria-label="聲音開關">聲音</button>
+    <div class="topbar__actions">
+      <button id="sutraBtn" class="icon-btn" title="誦經播放" aria-label="誦經播放">誦經</button>
+      <button id="muteBtn" class="icon-btn" title="聲音開關" aria-label="聲音開關">聲音</button>
+    </div>
   </header>
 
   <!-- 燃香狀態 -->
@@ -142,6 +145,26 @@
       <span>動態效果（陀螺儀煙霧 / 殘影）</span>
     </label>
     <p id="weatherInfo" class="weather-info"></p>
+
+    <hr class="divider" />
+    <div class="field">
+      <span>誦經 / 梵音</span>
+      <select id="sutraMode">
+        <option value="muyu">木魚</option>
+        <option value="bell">鐘磬</option>
+        <option value="fanyin">梵音（持頌）</option>
+        <option value="custom">自訂音檔網址</option>
+      </select>
+    </div>
+    <label class="field" id="sutraUrlField" hidden>
+      <span>音檔網址（mp3）</span>
+      <input id="sutraUrl" type="text" inputmode="url" placeholder="https://….mp3" />
+    </label>
+    <label class="field">
+      <span>音量：<b id="sutraVolLabel">50</b>％</span>
+      <input id="sutraVol" type="range" min="0" max="100" value="50" />
+    </label>
+    <button id="sutraToggle" type="button" class="btn btn--ghost">▶ 播放 / 暫停 誦經</button>
 
     <hr class="divider" />
     <label class="field field--row">
