@@ -103,28 +103,60 @@ muteBtn.addEventListener('click', () => {
   muteBtn.classList.toggle('is-muted', muted);
 });
 
-settingsBtn.addEventListener('click', () => { settingsPanel.hidden = false; });
-closeSettings.addEventListener('click', () => { settingsPanel.hidden = true; });
+// 設定面板：像拉窗簾般滑入/拖曳
+const settingsOverlay = document.getElementById('settingsOverlay');
+function openPanel() { settingsPanel.classList.add('is-open'); settingsOverlay.classList.add('is-open'); }
+function closePanel() { settingsPanel.classList.remove('is-open'); settingsOverlay.classList.remove('is-open'); }
+settingsBtn.addEventListener('click', openPanel);
+closeSettings.addEventListener('click', closePanel);
+settingsOverlay.addEventListener('click', closePanel);
 
-// 側滑開關設定：自右緣往左滑開啟；在設定上往右滑關閉
-let swStart = null;
+// 拉窗簾手勢：面板即時跟手，背幕隨之變暗；放手依拖動距離決定開合
+const panelW = () => settingsPanel.offsetWidth || Math.min(window.innerWidth * 0.92, 360);
+let g = null;
 window.addEventListener('touchstart', (e) => {
+  if (document.body.classList.contains('phase-idle')) return;
+  if (!document.getElementById('jiaobeiResult').hidden) return;
   const t = e.touches[0];
-  swStart = { x: t.clientX, y: t.clientY };
+  const w = panelW();
+  const open = settingsPanel.classList.contains('is-open');
+  if (open) {
+    if (t.clientX > window.innerWidth - w + 44) return; // 只在面板左緣/背幕抓取，避開滑桿
+  } else if (t.clientX < window.innerWidth - 28) {
+    return;                                              // 關閉時只在畫面右緣抓取
+  }
+  g = { x0: t.clientX, y0: t.clientY, w, open, committed: false, base: open ? 0 : w };
 }, { passive: true });
+window.addEventListener('touchmove', (e) => {
+  if (!g) return;
+  const t = e.touches[0];
+  const dx = t.clientX - g.x0;
+  const dy = t.clientY - g.y0;
+  if (!g.committed) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    if (Math.abs(dy) > Math.abs(dx)) { g = null; return; }   // 垂直 → 放給捲動
+    g.committed = true;
+    settingsPanel.classList.add('dragging', 'is-open');      // 拖曳期間可見、無過渡
+    settingsOverlay.classList.add('dragging');
+  }
+  e.preventDefault();
+  const off = Math.max(0, Math.min(g.w, g.base + dx));
+  settingsPanel.style.transform = `translateX(${off}px)`;
+  settingsOverlay.style.opacity = String((1 - off / g.w) * 0.5);
+  settingsOverlay.style.pointerEvents = 'auto';
+}, { passive: false });
 window.addEventListener('touchend', (e) => {
-  if (!swStart) return;
-  const t = e.changedTouches[0];
-  const dx = t.clientX - swStart.x;
-  const dy = t.clientY - swStart.y;
-  const startX = swStart.x;
-  swStart = null;
-  if (document.body.classList.contains('phase-idle')) return;       // 尚未開始參拜
-  if (!document.getElementById('jiaobeiResult').hidden) return;     // 擲筊頁面不攔截
-  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return; // 需明顯水平滑動
-  const open = !settingsPanel.hidden;
-  if (!open && dx < 0 && startX > window.innerWidth * 0.7) settingsPanel.hidden = false; // 右緣左滑→開
-  else if (open && dx > 0) settingsPanel.hidden = true;             // 右滑→關
+  if (!g) return;
+  const committed = g.committed; const w = g.w; const base = g.base; const x0 = g.x0;
+  g = null;
+  settingsPanel.classList.remove('dragging');
+  settingsOverlay.classList.remove('dragging');
+  settingsPanel.style.transform = '';
+  settingsOverlay.style.opacity = '';
+  settingsOverlay.style.pointerEvents = '';
+  if (!committed) return;
+  const off = Math.max(0, Math.min(w, base + (e.changedTouches[0].clientX - x0)));
+  if (off < w * 0.5) openPanel(); else closePanel();
 }, { passive: true });
 
 // 誦經 / 梵音

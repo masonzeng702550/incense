@@ -231,7 +231,20 @@ body:not(.phase-idle) .gate { display: none; }
   display: flex; flex-direction: column; gap: 1.25rem;
   box-shadow: -8px 0 24px rgba(0,0,0,.4);
   overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  /* 像拉窗簾：預設拉到畫面右外，滑入/拖曳顯示 */
+  transform: translateX(100%);
+  transition: transform .34s cubic-bezier(.33, 0, .2, 1);
+  pointer-events: none; will-change: transform;
 }
+.settings.is-open { transform: translateX(0); pointer-events: auto; }
+.settings.dragging { transition: none; }
+/* 窗簾背幕（拉開時漸暗的背景） */
+.settings-overlay {
+  position: fixed; inset: 0; z-index: 39; background: #000;
+  opacity: 0; pointer-events: none; transition: opacity .34s ease;
+}
+.settings-overlay.is-open { opacity: .5; pointer-events: auto; }
+.settings-overlay.dragging { transition: none; }
 .field { display: flex; flex-direction: column; gap: .5rem; font-size: 1.1rem; }
 .field--row { flex-direction: row; align-items: center; gap: .75rem; }
 .field--row input[type=checkbox] { width: 26px; height: 26px; accent-color: var(--temple-red); }
