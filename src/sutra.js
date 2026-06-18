@@ -39,17 +39,42 @@ export async function unlock() {
 
 
 // 木魚「篤」
+// 木魚「篤」：木質撞擊雜訊（帶通）＋ 中空共鳴體（音高下滑、快速衰減）
+let _noiseBuf;
+function noiseBuffer() {
+  if (_noiseBuf) return _noiseBuf;
+  const len = Math.ceil(ctx.sampleRate * 0.2);
+  _noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = _noiseBuf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+  return _noiseBuf;
+}
 function muyu(t) {
-  const o = ctx.createOscillator();
-  o.type = 'square';
-  o.frequency.setValueAtTime(420, t);
-  o.frequency.exponentialRampToValueAtTime(170, t + 0.06);
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.8, t + 0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
-  o.connect(g).connect(master);
-  o.start(t); o.stop(t + 0.15);
+  // 撞擊聲（木頭敲擊的「咑」）
+  const n = ctx.createBufferSource(); n.buffer = noiseBuffer();
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1100; bp.Q.value = 5;
+  const ng = ctx.createGain(); ng.gain.value = 0.55;
+  n.connect(bp).connect(ng).connect(master);
+  // 中空木魚共鳴體
+  const o = ctx.createOscillator(); o.type = 'triangle';
+  o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(135, t + 0.05);
+  const og = ctx.createGain();
+  og.gain.setValueAtTime(0.0001, t);
+  og.gain.exponentialRampToValueAtTime(0.75, t + 0.004);
+  og.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+  o.connect(og).connect(master);
+  // 第二諧波讓木質更實
+  const o2 = ctx.createOscillator(); o2.type = 'sine';
+  o2.frequency.setValueAtTime(620, t); o2.frequency.exponentialRampToValueAtTime(300, t + 0.04);
+  const og2 = ctx.createGain();
+  og2.gain.setValueAtTime(0.0001, t);
+  og2.gain.exponentialRampToValueAtTime(0.25, t + 0.003);
+  og2.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+  o2.connect(og2).connect(master);
+
+  n.start(t); n.stop(t + 0.2);
+  o.start(t); o.stop(t + 0.18);
+  o2.start(t); o2.stop(t + 0.1);
 }
 
 // 鐘磬 / 缽
