@@ -88,8 +88,8 @@ body.tablet-mode .tablet { display: flex; }
 .tablet__cols-row { display: flex; align-items: flex-start; justify-content: center; gap: 8px; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
-  /* 楷書／毛筆書法感（依裝置使用系統楷體） */
-  font-family: "Kaiti TC", "標楷體", "DFKai-SB", "BiauKai", "KaiTi", "楷体", "Noto Serif TC", "Songti TC", serif;
+  /* 毛筆書法感：霞鶩文楷優先，無則退回系統楷體 */
+  font-family: "LXGW WenKai TC", "Kaiti TC", "標楷體", "DFKai-SB", "BiauKai", "KaiTi", "楷体", "Noto Serif TC", "Songti TC", serif;
   color: var(--tablet-ink); text-shadow: 0 1px 3px rgba(0,0,0,.7);
   line-height: 1.35; letter-spacing: 2px; font-weight: 500;
   font-size: clamp(28px, 7.2vw, 42px);   /* 兩欄同字級，放大 */
@@ -222,7 +222,8 @@ body:not(.phase-idle) .gate { display: none; }
 .cup-spec2 { fill: #fff; opacity: .8; }                 /* 凸面亮點 */
 .cup-flatsheen { fill: #fff; opacity: .07; }            /* 平面薄光 */
 .cup-label { fill: var(--gold); font-size: 16px; letter-spacing: 2px; text-anchor: middle; font-family: serif; }
-.jiaobei-text { font-size: 1.7rem; color: var(--gold); font-weight: 700; letter-spacing: .15em; padding: 0 1rem; text-align: center; min-height: 2rem; }
+.jiaobei-text { font-size: 1.7rem; color: var(--gold); font-weight: 700; letter-spacing: .15em; padding: 0 1rem; text-align: center; min-height: 2rem; line-height: 1.5; }
+.jiaobei-count { font-size: 1.15rem; opacity: .85; }
 .jiaobei-actions { display: flex; gap: 1rem; }
 .jiaobei-hint { color: var(--text); opacity: .6; font-size: 1rem; }
 

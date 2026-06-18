@@ -56,17 +56,27 @@ async function enableMotion() {
   return ok;
 }
 
-// 「開始參拜」：只在第一次（unset）或已選開啟（on）時請求；選擇被記住，不再每次詢問
+// 啟動時只在「瀏覽器已記住授權」時靜默開啟鏡頭，絕不主動跳權限；
+// 動態效果改由設定開關或擲筊搖晃時才請求 → 不再每次開啟 PWA 都被詢問
+async function autoStartCamera() {
+  if (getPref('camera') === 'off' || !caps.hasCamera) return;
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      const p = await navigator.permissions.query({ name: 'camera' });
+      if (p.state === 'granted') enableCamera();   // 已授權 → 靜默開啟，不跳窗
+      return;                                       // prompt/denied → 不自動詢問
+    }
+  } catch { /* 不支援查詢（Safari）→ 不自動詢問，避免每次跳窗 */ }
+}
+
+// 「開始參拜」
 startBtn.addEventListener('click', async () => {
   sound.unlock();
   sutra.unlock();
   store.set({ phase: 'ready' });
   document.body.classList.remove('phase-idle');
 
-  if (caps.isMobile) {
-    if (getPref('camera') !== 'off') enableCamera();
-    if (getPref('motion') !== 'off') enableMotion();
-  }
+  if (caps.isMobile) autoStartCamera();
 
   // Android Chrome：嘗試 App 內主動掃描 NFC
   if (caps.hasNfc) {

@@ -1,29 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bgm" cx="50%" cy="42%" r="75%">
-      <stop offset="0%" stop-color="#2a1810"/>
-      <stop offset="100%" stop-color="#160c07"/>
+    <radialGradient id="bgm" cx="50%" cy="42%" r="85%">
+      <stop offset="0" stop-color="#7e1a1a"/>
+      <stop offset="100%" stop-color="#350b0b"/>
     </radialGradient>
+    <linearGradient id="gm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7da8c"/>
+      <stop offset="100%" stop-color="#c0902c"/>
+    </linearGradient>
     <radialGradient id="emberm" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="35%" stop-color="#ff8a2b"/>
-      <stop offset="100%" stop-color="#ff7a18" stop-opacity="0"/>
+      <stop offset="0" stop-color="#fff3cf"/>
+      <stop offset="40%" stop-color="#ff8a2b"/>
+      <stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
-  <!-- maskable：滿版底，內容收在中央安全區 -->
   <rect width="512" height="512" fill="url(#bgm)"/>
 
-  <circle cx="256" cy="256" r="92" fill="none" stroke="#d4af37" stroke-opacity="0.22" stroke-width="2"/>
-
-  <!-- 一炷香 -->
-  <line x1="256" y1="212" x2="256" y2="356" stroke="#caa06a" stroke-width="6" stroke-linecap="round"/>
-
-  <!-- 火星 -->
-  <circle cx="256" cy="212" r="28" fill="url(#emberm)"/>
-  <circle cx="256" cy="212" r="6" fill="#fff"/>
-
-  <!-- 一縷煙 -->
-  <path d="M256 192 C240 168 280 152 256 128 C240 110 276 96 256 76"
-        fill="none" stroke="#d8d2c8" stroke-opacity="0.5" stroke-width="6" stroke-linecap="round"/>
+  <!-- 內容收於中央安全區（約 0.78 縮放） -->
+  <g transform="translate(256,262) scale(0.78) translate(-256,-256)">
+    <g fill="none" stroke="url(#gm)" stroke-linecap="round">
+      <path d="M256 196 C232 162 282 140 256 104 C236 76 278 56 256 30" stroke-width="13" opacity=".9"/>
+      <path d="M212 208 C198 182 226 164 214 136" stroke-width="9" opacity=".6"/>
+      <path d="M300 208 C314 182 286 164 298 136" stroke-width="9" opacity=".6"/>
+    </g>
+    <rect x="251" y="196" width="10" height="130" rx="5" fill="url(#gm)"/>
+    <circle cx="256" cy="196" r="30" fill="url(#emberm)"/>
+    <circle cx="256" cy="196" r="7" fill="#fff7e2"/>
+    <g fill="none" stroke="url(#gm)" stroke-width="13" stroke-linecap="round">
+      <path d="M168 322 q-34 4 -34 30 q0 22 30 24"/>
+      <path d="M344 322 q34 4 34 30 q0 22 -30 24"/>
+    </g>
+    <g fill="url(#gm)">
+      <rect x="198" y="404" width="11" height="34" rx="4"/>
+      <rect x="250" y="408" width="12" height="34" rx="4"/>
+      <rect x="303" y="404" width="11" height="34" rx="4"/>
+    </g>
+    <path d="M160 322 C160 388 200 418 256 418 C312 418 352 388 352 322 Z" fill="url(#gm)"/>
+    <ellipse cx="256" cy="322" rx="98" ry="17" fill="#e7c977"/>
+    <ellipse cx="256" cy="322" rx="86" ry="11" fill="#5a1212"/>
+  </g>
 </svg>

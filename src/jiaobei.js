@@ -97,8 +97,9 @@ export function initJiaobei() {
       const prev = store.get().jiaobei.shengCount;
       const next = key === 'sheng' ? prev + 1 : 0;
       store.set({ jiaobei: { last: key, shengCount: next } });
-      text.textContent = `${RESULTS[key].name}　${RESULTS[key].desc}`
-        + (next >= 3 ? '（連續三聖筊）' : next > 0 ? `（聖筊 ${next}/3）` : '');
+      const note = next >= 3 ? '連續三聖筊' : next > 0 ? `聖筊 ${next}/3` : '';
+      text.innerHTML = `${RESULTS[key].name}　${RESULTS[key].desc}`
+        + (note ? `<br><span class="jiaobei-count">（${note}）</span>` : '');
       throwing = false;
     };
 
