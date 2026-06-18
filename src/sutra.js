@@ -8,9 +8,9 @@ let droneG = null;
 let droneOsc = [];
 let audioEl = null;
 
+// 音量交給裝置系統音量控制（一律全幅輸出）
 const state = {
   mode: localStorage.getItem('sutra_mode') || 'muyu',
-  volume: Number(localStorage.getItem('sutra_vol') ?? 50) / 100,
   url: localStorage.getItem('sutra_url') || '',
 };
 
@@ -22,7 +22,7 @@ function ensure() {
   if (ctx) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
   master = ctx.createGain();
-  master.gain.value = Math.max(0.0001, state.volume);
+  master.gain.value = 1;
   master.connect(ctx.destination);
 }
 
@@ -124,7 +124,6 @@ function startPlaylist(urls, onError) {
 function playOne() {
   audioEl.loop = playlist.length === 1;       // 單檔無縫循環
   audioEl.src = playlist[plIndex];
-  audioEl.volume = state.volume;
   audioEl.play().catch(() => { if (onPlError) onPlError(); });
 }
 function stopPlaylist() {
@@ -150,7 +149,7 @@ function startTTS(lines) {
     const u = new SpeechSynthesisUtterance(lines[i]);
     if (voice) u.voice = voice;
     u.lang = (voice && voice.lang) || 'zh-TW';
-    u.rate = 0.82; u.pitch = 1; u.volume = state.volume;
+    u.rate = 0.82; u.pitch = 1; u.volume = 1;
     u.onend = () => { i++; if (playing) next(); };
     u.onerror = () => { i++; if (playing) setTimeout(next, 300); };
     speechSynthesis.speak(u);
@@ -194,12 +193,6 @@ export function setMode(m) {
   localStorage.setItem('sutra_mode', m);
   notify();
   if (was) play();
-}
-export function setVolume(v) {
-  state.volume = Math.max(0, Math.min(1, v));
-  localStorage.setItem('sutra_vol', Math.round(state.volume * 100));
-  if (master) master.gain.value = state.volume;
-  if (audioEl) audioEl.volume = state.volume;
 }
 export function setUrl(u) { state.url = u; localStorage.setItem('sutra_url', u); }
 export function getState() { return state; }

@@ -110,22 +110,17 @@ closeSettings.addEventListener('click', () => { settingsPanel.hidden = true; });
 const sutraBtn = document.getElementById('sutraBtn');
 const sutraToggle = document.getElementById('sutraToggle');
 const sutraMode = document.getElementById('sutraMode');
-const sutraVol = document.getElementById('sutraVol');
-const sutraVolLabel = document.getElementById('sutraVolLabel');
 const sutraUrl = document.getElementById('sutraUrl');
 const sutraUrlField = document.getElementById('sutraUrlField');
 {
   const s = sutra.getState();
   sutraMode.value = s.mode;
-  sutraVol.value = Math.round(s.volume * 100);
-  sutraVolLabel.textContent = Math.round(s.volume * 100);
   sutraUrl.value = s.url;
   sutraUrlField.hidden = s.mode !== 'custom';
 }
 sutraBtn.addEventListener('click', () => sutra.toggle());
 sutraToggle.addEventListener('click', () => sutra.toggle());
 sutraMode.addEventListener('change', () => { sutra.setMode(sutraMode.value); sutraUrlField.hidden = sutraMode.value !== 'custom'; });
-sutraVol.addEventListener('input', () => { sutra.setVolume(Number(sutraVol.value) / 100); sutraVolLabel.textContent = sutraVol.value; });
 sutraUrl.addEventListener('input', () => sutra.setUrl(sutraUrl.value));
 const sutraBtnLabel = document.getElementById('sutraBtnLabel');
 const sutraToggleLabel = document.getElementById('sutraToggleLabel');
