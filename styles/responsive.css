@@ -2,11 +2,11 @@
 .is-desktop .camera-only { display: none !important; }
 body:not(.has-nfc) .nfc-only { display: none !important; }
 
-/* 手機（直式） */
+/* 手機（直式）：維持大按鈕方便長輩操作 */
 @media (max-width: 768px) {
-  .gate__title { font-size: 1.7rem; }
-  .controls { gap: .5rem; }
-  .btn { padding: .7rem 1rem; font-size: .95rem; }
+  .gate__title { font-size: 1.9rem; }
+  .controls { gap: .7rem; }
+  .btn { padding: .9rem 1.3rem; font-size: 1.2rem; min-height: 58px; }
 }
 
 /* 桌機 / 平板：香爐置中、較大留白 */
