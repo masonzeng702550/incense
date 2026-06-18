@@ -1,6 +1,7 @@
-// F9 — 擲筊（紅漆月牙形筊杯：一面平=陽、一面凸=陰）；可點按鈕或向上甩動投擲
+// F9 — 擲筊：3D 月牙筊（CrescentMoon.stl，紅色霧面）；無 WebGL 時退回 2D 月牙。可點按鈕或向上甩動投擲
 import { store } from './store.js';
 import { sound } from './sound.js';
+import * as j3d from './jiaobei3d.js';
 
 const RESULTS = {
   sheng: { name: '聖筊', desc: '神明應允' },
@@ -10,16 +11,16 @@ const RESULTS = {
 
 // a/b：true = 平面朝上（陽）；false = 凸面朝上（陰）
 function decide(a, b) {
-  if (a !== b) return 'sheng';   // 一陰一陽
-  return a ? 'xiao' : 'yin';     // 兩陽=笑筊；兩陰=陰筊
+  if (a !== b) return 'sheng';
+  return a ? 'xiao' : 'yin';
 }
 
-// 月牙形筊杯。s: 'flat'(陽,平面) | 'convex'(陰,凸面有光澤) | 'roll'(翻滾中)。id 讓漸層唯一
+// 2D 退回用月牙筊
 const TOP = 'M22 44 Q70 84 118 44 Q70 60 22 44 Z';
 function cupSvg(s, id) {
   const cls = s === 'flat' ? 'cup--flat' : s === 'convex' ? 'cup--convex' : 'cup--roll';
   const label = s === 'flat' ? '陽' : s === 'convex' ? '陰' : '';
-  const fill = s === 'flat' ? `url(#flat${id})` : s === 'convex' ? `url(#dome${id})` : `url(#dome${id})`;
+  const fill = s === 'flat' ? `url(#flat${id})` : `url(#dome${id})`;
   const spec = s === 'convex'
     ? '<ellipse class="cup-spec" cx="70" cy="51" rx="30" ry="6"/><ellipse class="cup-spec2" cx="57" cy="50" rx="9" ry="3"/>'
     : s === 'flat'
@@ -43,77 +44,91 @@ function cupSvg(s, id) {
 }
 
 let throwing = false;
+let use3d = false;
+let inited = false;
 
 export function initJiaobei() {
   const openBtn = document.getElementById('jiaobeiBtn');
   const panel = document.getElementById('jiaobeiResult');
   const stage = panel.querySelector('.jiaobei-stage');
+  const canvas = document.getElementById('jiaobeiCanvas');
+  const cupsWrap = document.getElementById('jiaobeiCups');
   const cupA = document.getElementById('cupA');
   const cupB = document.getElementById('cupB');
   const text = document.getElementById('jiaobeiText');
   const throwBtn = document.getElementById('throwBtn');
   const closeBtn = document.getElementById('jiaobeiClose');
 
-  const cups = panel.querySelector('.jiaobei-cups');
-
-  function rest() {
+  function restSvg() {
     cupA.className = 'cup'; cupB.className = 'cup';
     cupA.innerHTML = cupSvg('flat', 'a'); cupB.innerHTML = cupSvg('convex', 'b');
+  }
+
+  async function open() {
+    panel.hidden = false;
+    if (!inited) { inited = true; use3d = await j3d.ensure3d(canvas); }
+    if (use3d) {
+      canvas.hidden = false; cupsWrap.hidden = true;
+      j3d.resize(canvas); j3d.settle(true, false);
+    } else {
+      canvas.hidden = true; cupsWrap.hidden = false;
+      restSvg();
+    }
     text.textContent = '擲筊請示';
   }
 
-  function open() {
-    panel.hidden = false;
-    rest();
+  function impact() {
+    stage.classList.add('impact');
+    if (navigator.vibrate) { try { navigator.vibrate(35); } catch { /* */ } }
+    setTimeout(() => stage.classList.remove('impact'), 280);
   }
 
   function doThrow() {
     if (throwing) return;
     throwing = true;
     text.textContent = '擲筊中…';
-    cupA.className = 'cup throwing'; cupB.className = 'cup throwing';
-    cupA.innerHTML = cupSvg('roll', 'a'); cupB.innerHTML = cupSvg('roll', 'b');
     sound.jiaobei();
+    const a = Math.random() < 0.5;
+    const b = Math.random() < 0.5;
+    const key = decide(a, b);
+    setTimeout(impact, 560);
 
-    // 落地撞擊：晃動 + 震動
-    setTimeout(() => {
-      cups.classList.add('impact');
-      if (navigator.vibrate) { try { navigator.vibrate(35); } catch { /* */ } }
-      setTimeout(() => cups.classList.remove('impact'), 280);
-    }, 560);
-
-    setTimeout(() => {
-      const a = Math.random() < 0.5;
-      const b = Math.random() < 0.5;
-      const key = decide(a, b);
-      cupA.className = 'cup'; cupB.className = 'cup';
-      cupA.innerHTML = cupSvg(a ? 'flat' : 'convex', 'a');
-      cupB.innerHTML = cupSvg(b ? 'flat' : 'convex', 'b');
+    const finish = () => {
       const prev = store.get().jiaobei.shengCount;
       const next = key === 'sheng' ? prev + 1 : 0;
       store.set({ jiaobei: { last: key, shengCount: next } });
       text.textContent = `${RESULTS[key].name}　${RESULTS[key].desc}`
         + (next >= 3 ? '（連續三聖筊）' : next > 0 ? `（聖筊 ${next}/3）` : '');
       throwing = false;
-    }, 820);
+    };
+
+    if (use3d) {
+      j3d.throwAnim(a, b, finish);
+    } else {
+      cupA.className = 'cup throwing'; cupB.className = 'cup throwing';
+      cupA.innerHTML = cupSvg('roll', 'a'); cupB.innerHTML = cupSvg('roll', 'b');
+      setTimeout(() => {
+        cupA.className = 'cup'; cupB.className = 'cup';
+        cupA.innerHTML = cupSvg(a ? 'flat' : 'convex', 'a');
+        cupB.innerHTML = cupSvg(b ? 'flat' : 'convex', 'b');
+        finish();
+      }, 820);
+    }
   }
 
   openBtn.addEventListener('click', open);
   throwBtn.addEventListener('click', doThrow);
   closeBtn.addEventListener('click', () => { panel.hidden = true; });
 
-  // 向上甩動投擲（像丟寶可夢球）；輕點空白處關閉
+  // 向上甩動投擲；輕點空白處關閉
   let sy = null, st = 0, moved = false;
-  const onDown = (y) => { sy = y; st = performance.now(); moved = false; };
-  const onMove = (y) => { if (sy !== null && Math.abs(y - sy) > 12) moved = true; };
-  const onUp = (y, target) => {
+  panel.addEventListener('pointerdown', (e) => { sy = e.clientY; st = performance.now(); moved = false; });
+  panel.addEventListener('pointermove', (e) => { if (sy !== null && Math.abs(e.clientY - sy) > 12) moved = true; });
+  panel.addEventListener('pointerup', (e) => {
     if (sy === null) return;
-    const dy = y - sy; const dt = performance.now() - st;
+    const dy = e.clientY - sy; const dt = performance.now() - st;
     sy = null;
-    if (dy < -45 && dt < 600) { doThrow(); return; }     // 向上甩 → 擲筊
-    if (!moved && (target === panel || target === stage)) panel.hidden = true; // 點空白關閉
-  };
-  panel.addEventListener('pointerdown', (e) => onDown(e.clientY));
-  panel.addEventListener('pointermove', (e) => onMove(e.clientY));
-  panel.addEventListener('pointerup', (e) => onUp(e.clientY, e.target));
+    if (dy < -45 && dt < 600) { doThrow(); return; }
+    if (!moved && (e.target === panel || e.target === stage)) panel.hidden = true;
+  });
 }
