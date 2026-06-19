@@ -1,5 +1,6 @@
 // 誦經 / 梵音：WebAudio 合成木魚・鐘磬・梵音 + 四部佛經語音朗讀（TTS），亦支援自訂 mp3 網址
 import { SUTRAS } from './sutra-texts.js';
+import { caps } from './platform.js';
 
 let ctx, master;
 let playing = false;
@@ -19,18 +20,32 @@ const listeners = new Set();
 function notify() { listeners.forEach((fn) => fn(playing, state)); }
 export function onSutra(fn) { listeners.add(fn); fn(playing, state); }
 
+let sinkEl;
 function ensure() {
   if (ctx) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
   master = ctx.createGain();
   master.gain.value = 1;
-  master.connect(ctx.destination);
+  // iOS：把合成音導到 <audio> 媒體聲道，避免被「靜音開關」靜音（念誦走 <audio> 不受影響，合成音才會）
+  let routed = false;
+  if (caps.isIOS) {
+    try {
+      const dest = ctx.createMediaStreamDestination();
+      master.connect(dest);
+      sinkEl = new Audio();
+      sinkEl.srcObject = dest.stream;
+      sinkEl.playsInline = true;
+      routed = true;
+    } catch { routed = false; }
+  }
+  if (!routed) master.connect(ctx.destination);
 }
 
 // 在使用者手勢中解鎖音訊（iOS / 自動播放政策）
 export async function unlock() {
   ensure();
   if (ctx.state !== 'running') { try { await ctx.resume(); } catch { /* */ } }
+  if (sinkEl) { try { await sinkEl.play(); } catch { /* */ } } // 啟動媒體聲道輸出
   try {
     const b = ctx.createBuffer(1, 1, 22050);
     const s = ctx.createBufferSource();
@@ -54,14 +69,14 @@ function muyu(t) {
   // 撞擊聲（木頭敲擊的「咑」）
   const n = ctx.createBufferSource(); n.buffer = noiseBuffer();
   const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1100; bp.Q.value = 5;
-  const ng = ctx.createGain(); ng.gain.value = 0.55;
+  const ng = ctx.createGain(); ng.gain.value = 0.7;
   n.connect(bp).connect(ng).connect(master);
   // 中空木魚共鳴體
   const o = ctx.createOscillator(); o.type = 'triangle';
   o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(135, t + 0.05);
   const og = ctx.createGain();
   og.gain.setValueAtTime(0.0001, t);
-  og.gain.exponentialRampToValueAtTime(0.75, t + 0.004);
+  og.gain.exponentialRampToValueAtTime(0.95, t + 0.004);
   og.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
   o.connect(og).connect(master);
   // 第二諧波讓木質更實
