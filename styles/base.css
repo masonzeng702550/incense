@@ -76,10 +76,11 @@ body.tablet-mode .tablet { display: flex; }
   display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
 
-/* 名諱欄置中，歷代註記置於左側 → 名諱與往生蓮位同在中央軸線 */
-.tablet__cols { flex: 1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
-.tablet__name { grid-column: 2; }
-.tablet__lineage { grid-column: 1; justify-self: end; align-self: start; margin-right: 6px; font-size: clamp(20px, 5vw, 28px); opacity: .92; }
+/* 名諱嚴格置中：左為歷代註記、右為等寬隱形鏡像 → 名諱永遠落在正中軸線 */
+.tablet__cols { flex: 1; display: flex; align-items: center; justify-content: center; }
+.tablet__mid { display: flex; align-items: flex-start; justify-content: center; gap: 8px; }
+.tablet__lineage { font-size: clamp(18px, 4.4vw, 26px); opacity: .9; align-self: flex-start; }
+.tablet__spacer { visibility: hidden; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
   /* 毛筆書法感：霞鶩文楷優先，無則退回系統楷體 */

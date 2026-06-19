@@ -99,16 +99,26 @@ function apply() {
   els.tablet.className = 'tablet tablet--' + c.style;
   const { main, lineage, suffix } = content(c);
   els.cols.innerHTML = '';
+  const mid = document.createElement('div');
+  mid.className = 'tablet__mid';
   if (lineage) {
     const ln = document.createElement('div');
     ln.className = 'tablet__col tablet__lineage';
     ln.textContent = lineage;
-    els.cols.appendChild(ln);
+    mid.appendChild(ln);
   }
   const nm = document.createElement('div');
   nm.className = 'tablet__col tablet__name';
   nm.textContent = main;
-  els.cols.appendChild(nm);
+  mid.appendChild(nm);
+  if (lineage) {
+    const sp = document.createElement('div');     // 等寬隱形鏡像，使名諱置中
+    sp.className = 'tablet__col tablet__lineage tablet__spacer';
+    sp.setAttribute('aria-hidden', 'true');
+    sp.textContent = lineage;
+    mid.appendChild(sp);
+  }
+  els.cols.appendChild(mid);
   els.suffix.textContent = suffix;
   els.suffix.hidden = !suffix;
 
