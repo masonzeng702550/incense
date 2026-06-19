@@ -76,11 +76,9 @@ body.tablet-mode .tablet { display: flex; }
   display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
 
-/* 名諱嚴格置中：左為歷代註記、右為等寬隱形鏡像 → 名諱永遠落在正中軸線 */
+/* 兩列字視為一個群組，群組整體置中（兩列同字級） */
 .tablet__cols { flex: 1; display: flex; align-items: center; justify-content: center; }
-.tablet__mid { display: flex; align-items: flex-start; justify-content: center; gap: 8px; }
-.tablet__lineage { font-size: clamp(18px, 4.4vw, 26px); opacity: .9; align-self: flex-start; }
-.tablet__spacer { visibility: hidden; }
+.tablet__cols-row { display: flex; align-items: flex-start; justify-content: center; gap: 10px; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
   /* 毛筆書法感：霞鶩文楷優先，無則退回系統楷體 */
