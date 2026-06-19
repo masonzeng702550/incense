@@ -59,14 +59,14 @@ async function enableMotion() {
 // 啟動時只在「瀏覽器已記住授權」時靜默開啟鏡頭，絕不主動跳權限；
 // 動態效果改由設定開關或擲筊搖晃時才請求 → 不再每次開啟 PWA 都被詢問
 async function autoStartCamera() {
-  if (getPref('camera') === 'off' || !caps.hasCamera) return;
+  if (getPref('camera') !== 'on' || !caps.hasCamera) return; // 只有使用者「明確開啟過」才還原
   try {
     if (navigator.permissions && navigator.permissions.query) {
       const p = await navigator.permissions.query({ name: 'camera' });
-      if (p.state === 'granted') enableCamera();   // 已授權 → 靜默開啟，不跳窗
-      return;                                       // prompt/denied → 不自動詢問
+      if (p.state === 'denied') { setPref('camera', 'off'); featCamera.checked = false; return; }
     }
-  } catch { /* 不支援查詢（Safari）→ 不自動詢問，避免每次跳窗 */ }
+  } catch { /* 不支援查詢（Safari）→ 直接還原（已授權則靜默） */ }
+  enableCamera();   // 已授權 → 靜默開啟；尚未授權則因使用者選用過而再請求
 }
 
 // 「開始參拜」
