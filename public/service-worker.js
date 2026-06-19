@@ -1,7 +1,7 @@
 // 環保電子香 — Service Worker
 // 策略：HTML 走 network-first（永遠拿最新、引用到最新樣式/程式）；
 //       帶 hash 的 JS/CSS/圖示走 cache-first（檔名不同即更新）。
-const CACHE = 'incense-v5';
+const CACHE = 'incense-v6';
 // build 時由 vite 注入 self.__PRECACHE__（含全部帶 hash 的 JS/CSS）；無注入時退回基本清單
 const PRECACHE = self.__PRECACHE__ || [
   './',
