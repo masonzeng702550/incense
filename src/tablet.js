@@ -32,14 +32,15 @@ function loadCookie() {
 }
 
 // 設定 → { cols: [由左到右的直書欄], suffix }
+// → { main: 置中名諱欄, lineage: 左側歷代註記, suffix: 下方蓮位 }
 function content(c) {
   if (c.kind === 'pet') {
     const nm = (c.petName || '').trim() || '○○';
     switch (c.petTemplate) {
-      case 'pet_wangsheng': return { cols: [nm], suffix: '往生蓮位' };
-      case 'pet_aichong': return { cols: ['愛寵' + nm], suffix: '之蓮位' };
-      case 'pet_lingwei': return { cols: [nm], suffix: '之靈位' };
-      default: return { cols: [nm], suffix: '' };
+      case 'pet_wangsheng': return { main: nm, lineage: '', suffix: '往生蓮位' };
+      case 'pet_aichong': return { main: '愛寵' + nm, lineage: '', suffix: '之蓮位' };
+      case 'pet_lingwei': return { main: nm, lineage: '', suffix: '之靈位' };
+      default: return { main: nm, lineage: '', suffix: '' };
     }
   }
   const sur = (c.surname || '').trim();
@@ -47,11 +48,11 @@ function content(c) {
   const full = (sur + giv) || '○○○';
   const surC = sur || '○';
   switch (c.template) {
-    case 'wangsheng': return { cols: [`${surC}氏歷代`, full], suffix: '往生蓮位' };
-    case 'lianwei': return { cols: [full], suffix: '之蓮位' };
-    case 'lidai': return { cols: [`${surC}氏歷代祖先`], suffix: '之蓮位' };
-    case 'lingwei': return { cols: [full], suffix: '之靈位' };
-    default: return { cols: [full], suffix: '' };
+    case 'wangsheng': return { main: full, lineage: `${surC}氏歷代`, suffix: '往生蓮位' };
+    case 'lianwei': return { main: full, lineage: '', suffix: '之蓮位' };
+    case 'lidai': return { main: `${surC}氏歷代祖先`, lineage: '', suffix: '之蓮位' };
+    case 'lingwei': return { main: full, lineage: '', suffix: '之靈位' };
+    default: return { main: full, lineage: '', suffix: '' };
   }
 }
 
@@ -96,17 +97,18 @@ function apply() {
   store.set({ tabletMode: state.on });
 
   els.tablet.className = 'tablet tablet--' + c.style;
-  const { cols, suffix } = content(c);
+  const { main, lineage, suffix } = content(c);
   els.cols.innerHTML = '';
-  const row = document.createElement('div');
-  row.className = 'tablet__cols-row';
-  for (const text of cols) {
-    const d = document.createElement('div');
-    d.className = 'tablet__col';
-    d.textContent = text;
-    row.appendChild(d);
+  if (lineage) {
+    const ln = document.createElement('div');
+    ln.className = 'tablet__col tablet__lineage';
+    ln.textContent = lineage;
+    els.cols.appendChild(ln);
   }
-  els.cols.appendChild(row);
+  const nm = document.createElement('div');
+  nm.className = 'tablet__col tablet__name';
+  nm.textContent = main;
+  els.cols.appendChild(nm);
   els.suffix.textContent = suffix;
   els.suffix.hidden = !suffix;
 

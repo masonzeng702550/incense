@@ -43,7 +43,7 @@ body.camera-active #altarBg { display: none; }
 
 /* 牌位（置於香之後：z-index 介於背景與香畫布之間） */
 .tablet {
-  position: fixed; left: 50%; top: 8vh; transform: translateX(-50%);
+  position: fixed; left: 50%; top: calc(var(--safe-top) + 3.6rem); transform: translateX(-50%);
   z-index: 1; display: none; flex-direction: column; align-items: center;
   pointer-events: none; width: min(66vw, 300px);
   --tablet-bg: linear-gradient(150deg, #58181a 0%, #3a0f10 55%, #2a0a0b 100%);
@@ -75,24 +75,18 @@ body.tablet-mode .tablet { display: flex; }
   min-height: 46vh;                /* 牌位加長 */
   display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
-/* 四角回紋角飾 */
-.tablet__inner::before, .tablet__inner::after {
-  content: ''; position: absolute; width: 20px; height: 20px;
-  border: 2px solid var(--tablet-edge); opacity: .65;
-}
-.tablet__inner::before { top: 7px; left: 7px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
-.tablet__inner::after { bottom: 7px; right: 7px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
 
-/* 名諱欄置中於「往生蓮位」之上的空間 */
-.tablet__cols { flex: 1; display: flex; align-items: center; justify-content: center; }
-.tablet__cols-row { display: flex; align-items: flex-start; justify-content: center; gap: 8px; }
+/* 名諱欄置中，歷代註記置於左側 → 名諱與往生蓮位同在中央軸線 */
+.tablet__cols { flex: 1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.tablet__name { grid-column: 2; }
+.tablet__lineage { grid-column: 1; justify-self: end; align-self: start; margin-right: 6px; font-size: clamp(20px, 5vw, 28px); opacity: .92; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
   /* 毛筆書法感：霞鶩文楷優先，無則退回系統楷體 */
   font-family: "LXGW WenKai TC", "Kaiti TC", "標楷體", "DFKai-SB", "BiauKai", "KaiTi", "楷体", "Noto Serif TC", "Songti TC", serif;
   color: var(--tablet-ink); text-shadow: 0 1px 3px rgba(0,0,0,.7);
   line-height: 1.35; letter-spacing: 2px; font-weight: 500;
-  font-size: clamp(28px, 7.2vw, 42px);   /* 兩欄同字級，放大 */
+  font-size: clamp(28px, 7.2vw, 42px);
 }
 
 /* 蓮花底座 */
