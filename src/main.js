@@ -38,6 +38,16 @@ const featMotion = document.getElementById('featMotion');
 featCamera.checked = getPref('camera') === 'on';
 featMotion.checked = getPref('motion') === 'on';
 
+// 三牲供奉
+const offeringsToggle = document.getElementById('offeringsToggle');
+const applyOfferings = (on) => document.body.classList.toggle('offerings-on', on);
+offeringsToggle.checked = getPref('offerings') === 'on';
+applyOfferings(offeringsToggle.checked);
+offeringsToggle.addEventListener('change', () => {
+  applyOfferings(offeringsToggle.checked);
+  setPref('offerings', offeringsToggle.checked ? 'on' : 'off');
+});
+
 // NFC 帶入 ?action=lighter → 等使用者手勢後自動點香
 let pendingAutoIgnite = getNfcAction() === 'lighter';
 
