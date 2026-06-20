@@ -43,13 +43,13 @@ body.camera-active #altarBg { display: none; }
 
 /* 數位三牲供奉（圖層介於牌位與香之間：在香之後、牌位之前） */
 .offerings {
-  position: fixed; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 9rem);
-  z-index: 2; display: none; justify-content: center; align-items: flex-end; gap: clamp(.4rem, 3vw, 1.1rem);
+  position: fixed; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 12.5rem);
+  z-index: 2; display: none; justify-content: center; align-items: flex-end; gap: clamp(.4rem, 3vw, 1.2rem);
   pointer-events: none;
 }
 body.offerings-on .offerings { display: flex; }
 .offering { display: flex; }
-.o-svg { width: clamp(52px, 17vw, 78px); height: auto; filter: drop-shadow(0 5px 7px rgba(0,0,0,.55)); }
+.o-svg { width: clamp(74px, 23vw, 108px); height: auto; filter: drop-shadow(0 6px 8px rgba(0,0,0,.55)); }
 
 /* 牌位（置於香之後：z-index 介於背景與香畫布之間） */
 .tablet {
