@@ -98,7 +98,7 @@ body.tablet-mode.offerings-on .tablet { top: calc(var(--safe-top) + 2.4rem); tra
   font-size: clamp(28px, 7.2vw, 42px);
 }
 .tablet__char { line-height: 1.18; }
-.tablet__suffix { position: absolute; left: 50%; top: 64%; transform: translate(-50%, -50%); }
+.tablet__suffix { position: absolute; left: 50%; top: 71%; transform: translate(-50%, -50%); }
 
 /* 蓮花底座 */
 .tablet__stand { display: block; width: 90%; margin: -6px auto 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
