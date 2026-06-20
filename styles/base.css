@@ -39,12 +39,12 @@ body.camera-active #camera { display: block; }
 body.camera-active #altarBg { display: none; }
 
 /* 香 + 煙 畫布疊在背景上 */
-#stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
 
-/* 數位三牲供奉 */
+/* 數位三牲供奉（圖層介於牌位與香之間：在香之後、牌位之前） */
 .offerings {
   position: fixed; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 6rem);
-  z-index: 6; display: none; justify-content: center; gap: clamp(.6rem, 4vw, 1.5rem);
+  z-index: 2; display: none; justify-content: center; gap: clamp(.6rem, 4vw, 1.5rem);
   pointer-events: none;
 }
 body.offerings-on .offerings { display: flex; }
@@ -61,7 +61,9 @@ body.offerings-on .offerings { display: flex; }
   --tablet-edge: var(--gold);
   --tablet-ink: #f3d98a;
 }
-body.tablet-mode .tablet { display: flex; }
+body.tablet-mode .tablet { display: flex; transition: transform .3s ease, top .3s ease; }
+/* 開啟三牲時，牌位縮小並後移（往上、變小） */
+body.tablet-mode.offerings-on .tablet { top: calc(var(--safe-top) + 2.4rem); transform: translateX(-50%) scale(.82); transform-origin: center top; }
 
 /* 外框（粗金邊） + 內框線 */
 /* 頂飾：如意雲頭 */
@@ -82,14 +84,11 @@ body.tablet-mode .tablet { display: flex; }
   position: relative;
   border: 1.5px solid color-mix(in srgb, var(--tablet-edge) 60%, transparent);
   border-radius: 9px 9px 4px 4px;
-  padding: 26px 14px 32px;
   min-height: 46vh;                /* 牌位加長 */
-  display: flex; flex-direction: column; gap: 14px;
 }
 
-/* 兩列字視為一個群組，群組整體置中。用 margin:auto 置中（iOS Safari 對 vertical-rl + flex 置中有怪癖） */
-.tablet__cols { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.tablet__cols-row { display: flex; align-items: flex-start; gap: 10px; width: -moz-fit-content; width: fit-content; margin: 0 auto; }
+/* 兩列字群組與蓮位用「絕對定位 + translateX」幾何置中，避開 iOS Safari 對 vertical-rl 的置中怪癖 */
+.tablet__cols { position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%); display: flex; align-items: flex-start; gap: 10px; }
 .tablet__col, .tablet__suffix {
   writing-mode: vertical-rl; text-orientation: upright;
   /* 毛筆書法感：霞鶩文楷優先，無則退回系統楷體 */
@@ -98,7 +97,7 @@ body.tablet-mode .tablet { display: flex; }
   line-height: 1.35; letter-spacing: 2px; font-weight: 500;
   font-size: clamp(28px, 7.2vw, 42px);
 }
-.tablet__suffix { width: -moz-fit-content; width: fit-content; margin: 0 auto; }
+.tablet__suffix { position: absolute; left: 50%; top: 64%; transform: translate(-50%, -50%); }
 
 /* 蓮花底座 */
 .tablet__stand { display: block; width: 90%; margin: -6px auto 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }

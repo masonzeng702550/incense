@@ -98,20 +98,17 @@ function apply() {
 
   els.tablet.className = 'tablet tablet--' + c.style;
   const { main, lineage, suffix } = content(c);
-  els.cols.innerHTML = '';
-  const row = document.createElement('div');   // 兩列字群組
-  row.className = 'tablet__cols-row';
+  els.cols.innerHTML = '';   // .tablet__cols 本身即兩列字群組（flex row，絕對置中）
   if (lineage) {
     const ln = document.createElement('div');
     ln.className = 'tablet__col tablet__lineage';
     ln.textContent = lineage;
-    row.appendChild(ln);
+    els.cols.appendChild(ln);
   }
   const nm = document.createElement('div');
   nm.className = 'tablet__col tablet__name';
   nm.textContent = main;
-  row.appendChild(nm);
-  els.cols.appendChild(row);
+  els.cols.appendChild(nm);
   els.suffix.textContent = suffix;
   els.suffix.hidden = !suffix;
 
