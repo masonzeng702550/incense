@@ -98,18 +98,28 @@ function apply() {
 
   els.tablet.className = 'tablet tablet--' + c.style;
   const { main, lineage, suffix } = content(c);
-  els.cols.innerHTML = '';   // .tablet__cols 本身即兩列字群組（flex row，絕對置中）
+  // 逐字堆疊（避開 iOS Safari writing-mode: vertical-rl 的置中/寬度 bug）
+  const fillCol = (el, text) => {
+    el.innerHTML = '';
+    for (const ch of [...text]) {
+      const cc = document.createElement('div');
+      cc.className = 'tablet__char';
+      cc.textContent = ch;
+      el.appendChild(cc);
+    }
+  };
+  els.cols.innerHTML = '';   // .tablet__cols 本身即兩列字群組
   if (lineage) {
     const ln = document.createElement('div');
     ln.className = 'tablet__col tablet__lineage';
-    ln.textContent = lineage;
+    fillCol(ln, lineage);
     els.cols.appendChild(ln);
   }
   const nm = document.createElement('div');
   nm.className = 'tablet__col tablet__name';
-  nm.textContent = main;
+  fillCol(nm, main);
   els.cols.appendChild(nm);
-  els.suffix.textContent = suffix;
+  fillCol(els.suffix, suffix);
   els.suffix.hidden = !suffix;
 
   // 同步編輯 UI

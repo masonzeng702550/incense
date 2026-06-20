@@ -88,14 +88,16 @@ body.tablet-mode.offerings-on .tablet { top: calc(var(--safe-top) + 2.4rem); tra
 
 /* 兩列字群組與蓮位用「絕對定位 + translateX」幾何置中，避開 iOS Safari 對 vertical-rl 的置中怪癖 */
 .tablet__cols { position: absolute; left: 50%; top: 32%; transform: translate(-50%, -50%); display: flex; align-items: flex-start; gap: 10px; }
+/* 逐字堆疊成直行（不用 writing-mode，iOS 才能正確置中） */
 .tablet__col, .tablet__suffix {
-  writing-mode: vertical-rl; text-orientation: upright;
+  display: flex; flex-direction: column; align-items: center;
   /* 毛筆書法感：霞鶩文楷優先，無則退回系統楷體 */
   font-family: "LXGW WenKai TC", "Kaiti TC", "標楷體", "DFKai-SB", "BiauKai", "KaiTi", "楷体", "Noto Serif TC", "Songti TC", serif;
   color: var(--tablet-ink); text-shadow: 0 1px 3px rgba(0,0,0,.7);
-  line-height: 1.35; letter-spacing: 2px; font-weight: 500;
+  font-weight: 500;
   font-size: clamp(28px, 7.2vw, 42px);
 }
+.tablet__char { line-height: 1.18; }
 .tablet__suffix { position: absolute; left: 50%; top: 64%; transform: translate(-50%, -50%); }
 
 /* 蓮花底座 */
